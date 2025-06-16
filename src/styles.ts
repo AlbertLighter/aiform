@@ -1,0 +1,392 @@
+export const cssStyles = `
+/* AIForm 样式 */
+.aiform-button {
+  position: fixed;
+  z-index: 9999;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 50px;
+  padding: 12px 20px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  user-select: none;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.aiform-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+  background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+}
+
+.aiform-button:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+}
+
+.aiform-button svg {
+  flex-shrink: 0;
+}
+
+/* 模态框样式 */
+.aiform-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 10000;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.aiform-modal.active {
+  opacity: 1;
+  visibility: visible;
+}
+
+.aiform-modal-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(2px);
+}
+
+.aiform-modal-content {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+  width: 90%;
+  max-width: 600px;
+  max-height: 80vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.aiform-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px;
+  border-bottom: 1px solid #e5e7eb;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.aiform-modal-header h3 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.aiform-close-button {
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: white;
+  padding: 0;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s ease;
+}
+
+.aiform-close-button:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.aiform-modal-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px;
+}
+
+/* 标签样式 */
+.aiform-tabs {
+  display: flex;
+  border-bottom: 1px solid #e5e7eb;
+  margin-bottom: 24px;
+}
+
+.aiform-tab {
+  background: none;
+  border: none;
+  padding: 12px 24px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  color: #6b7280;
+  border-bottom: 2px solid transparent;
+  transition: all 0.2s ease;
+}
+
+.aiform-tab.active {
+  color: #667eea;
+  border-bottom-color: #667eea;
+}
+
+.aiform-tab:hover {
+  color: #667eea;
+  background: #f8fafc;
+}
+
+/* 表单数据预览 */
+.aiform-form-data h4 {
+  margin: 0 0 16px 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #374151;
+}
+
+.aiform-data-preview {
+  background: #f8fafc;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 16px;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.aiform-data-item {
+  display: flex;
+  margin-bottom: 8px;
+  gap: 8px;
+}
+
+.aiform-data-item:last-child {
+  margin-bottom: 0;
+}
+
+.aiform-data-key {
+  font-weight: 500;
+  color: #374151;
+  min-width: 120px;
+}
+
+.aiform-data-value {
+  color: #6b7280;
+  word-break: break-all;
+}
+
+.aiform-no-data {
+  color: #9ca3af;
+  font-style: italic;
+  margin: 0;
+  text-align: center;
+  padding: 20px;
+}
+
+.aiform-refresh-data {
+  background: #f3f4f6;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  padding: 8px 16px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s ease;
+}
+
+.aiform-refresh-data:hover {
+  background: #e5e7eb;
+}
+
+/* 配置表单 */
+.aiform-config-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.aiform-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.aiform-form-group label {
+  font-weight: 500;
+  color: #374151;
+  font-size: 14px;
+}
+
+.aiform-form-group input,
+.aiform-form-group select,
+.aiform-form-group textarea {
+  padding: 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 14px;
+  transition: border-color 0.2s ease;
+  font-family: inherit;
+}
+
+.aiform-form-group input:focus,
+.aiform-form-group select:focus,
+.aiform-form-group textarea:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.aiform-form-group textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+/* 模态框底部 */
+.aiform-modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 20px 24px;
+  border-top: 1px solid #e5e7eb;
+  background: #f8fafc;
+}
+
+.aiform-button-primary,
+.aiform-button-secondary {
+  padding: 12px 24px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: inherit;
+}
+
+.aiform-button-primary {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+}
+
+.aiform-button-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.aiform-button-secondary {
+  background: white;
+  color: #374151;
+  border: 1px solid #d1d5db;
+}
+
+.aiform-button-secondary:hover {
+  background: #f9fafb;
+  border-color: #9ca3af;
+}
+
+/* 状态消息 */
+.aiform-status {
+  padding: 12px 24px;
+  margin: 0;
+  font-size: 14px;
+  font-weight: 500;
+  text-align: center;
+  border-top: 1px solid #e5e7eb;
+  background: #f8fafc;
+}
+
+.aiform-status-info {
+  color: #2563eb;
+  background: #eff6ff;
+  border-top-color: #bfdbfe;
+}
+
+.aiform-status-success {
+  color: #059669;
+  background: #ecfdf5;
+  border-top-color: #a7f3d0;
+}
+
+.aiform-status-error {
+  color: #dc2626;
+  background: #fef2f2;
+  border-top-color: #fca5a5;
+}
+
+/* 响应式设计 */
+@media (max-width: 640px) {
+  .aiform-modal-content {
+    width: 95%;
+    max-height: 90vh;
+  }
+  
+  .aiform-modal-header,
+  .aiform-modal-body,
+  .aiform-modal-footer {
+    padding: 16px;
+  }
+  
+  .aiform-button {
+    padding: 10px 16px;
+    font-size: 12px;
+  }
+  
+  .aiform-tab {
+    padding: 10px 16px;
+    font-size: 13px;
+  }
+}
+
+/* 动画效果 */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -60%);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%);
+  }
+}
+
+.aiform-modal.active .aiform-modal-content {
+  animation: fadeIn 0.3s ease;
+}
+
+/* 滚动条样式 */
+.aiform-data-preview::-webkit-scrollbar,
+.aiform-modal-body::-webkit-scrollbar {
+  width: 6px;
+}
+
+.aiform-data-preview::-webkit-scrollbar-track,
+.aiform-modal-body::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 3px;
+}
+
+.aiform-data-preview::-webkit-scrollbar-thumb,
+.aiform-modal-body::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 3px;
+}
+
+.aiform-data-preview::-webkit-scrollbar-thumb:hover,
+.aiform-modal-body::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+`; 

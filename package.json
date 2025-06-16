@@ -1,0 +1,39 @@
+{
+  "name": "aiform",
+  "version": "1.0.0",
+  "description": "一个智能表单填写工具，使用AI自动重写表单内容",
+  "type": "module",
+  "main": "dist/aiform.js",
+  "module": "dist/aiform.esm.js",
+  "types": "dist/aiform.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "rollup -c",
+    "dev": "rollup -c -w",
+    "start": "python3 -m http.server 8000 || python -m SimpleHTTPServer 8000",
+    "serve": "npm run build && npm run start",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "ai",
+    "form",
+    "automation",
+    "openai",
+    "deepseek",
+    "openrouter"
+  ],
+  "author": "aiform",
+  "license": "MIT",
+  "devDependencies": {
+    "@rollup/plugin-commonjs": "^25.0.0",
+    "@rollup/plugin-node-resolve": "^15.0.0",
+    "@rollup/plugin-typescript": "^11.0.0",
+    "rollup": "^4.0.0",
+    "rollup-plugin-string": "^3.0.0",
+    "typescript": "^5.0.0",
+    "tslib": "^2.6.0"
+  },
+  "dependencies": {}
+} 
