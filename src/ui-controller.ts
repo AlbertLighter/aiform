@@ -1,5 +1,5 @@
 import { AIFormConfig } from './index';
-import { FormDataExtractor } from './form-extractor';
+import { FormDataExtractor, FormFieldInfo } from './form-extractor';
 
 export class UIController {
   private config: AIFormConfig;
@@ -8,6 +8,7 @@ export class UIController {
   private button: HTMLElement | null = null;
   private modal: HTMLElement | null = null;
   private isModalOpen = false;
+  private currentFormFields: FormFieldInfo[] = [];
 
   constructor(
     config: AIFormConfig, 
@@ -96,9 +97,33 @@ export class UIController {
           
           <div class="aiform-tab-content" id="aiform-data-tab">
             <div class="aiform-form-data">
-              <h4>检测到的表单数据：</h4>
-              <div class="aiform-data-preview"></div>
-              <button class="aiform-refresh-data">刷新数据</button>
+              <div class="aiform-data-header">
+                <h4>检测到的表单数据：</h4>
+                <div class="aiform-data-controls">
+                  <button class="aiform-select-all">全选</button>
+                  <button class="aiform-select-none">全不选</button>
+                  <button class="aiform-refresh-data">刷新数据</button>
+                </div>
+              </div>
+              <div class="aiform-data-table-container">
+                <table class="aiform-data-table">
+                  <thead>
+                    <tr>
+                      <th class="aiform-checkbox-col">选择</th>
+                      <th class="aiform-field-col">字段名</th>
+                      <th class="aiform-type-col">类型</th>
+                      <th class="aiform-value-col">当前值</th>
+                      <th class="aiform-options-col">可选项</th>
+                      <th class="aiform-status-col">状态</th>
+                    </tr>
+                  </thead>
+                  <tbody class="aiform-data-tbody">
+                  </tbody>
+                </table>
+                <div class="aiform-no-data" style="display: none;">
+                  <p>未检测到表单数据</p>
+                </div>
+              </div>
             </div>
           </div>
           
@@ -137,8 +162,11 @@ export class UIController {
         </div>
         
         <div class="aiform-modal-footer">
-          <button class="aiform-button-secondary aiform-test-connection">测试连接</button>
-          <button class="aiform-button-primary aiform-rewrite">开始重写</button>
+          <div class="aiform-selected-count">已选择 <span>0</span> 个字段</div>
+          <div class="aiform-footer-buttons">
+            <button class="aiform-button-secondary aiform-test-connection">测试连接</button>
+            <button class="aiform-button-primary aiform-rewrite">开始重写</button>
+          </div>
         </div>
         
         <div class="aiform-status"></div>
@@ -173,6 +201,13 @@ export class UIController {
     // 刷新数据按钮
     const refreshButton = this.modal.querySelector('.aiform-refresh-data');
     refreshButton?.addEventListener('click', () => this.refreshFormData());
+    
+    // 全选/全不选按钮
+    const selectAllButton = this.modal.querySelector('.aiform-select-all');
+    selectAllButton?.addEventListener('click', () => this.selectAllFields(true));
+    
+    const selectNoneButton = this.modal.querySelector('.aiform-select-none');
+    selectNoneButton?.addEventListener('click', () => this.selectAllFields(false));
     
     // 测试连接按钮
     const testButton = this.modal.querySelector('.aiform-test-connection');
@@ -228,23 +263,117 @@ export class UIController {
   }
 
   private refreshFormData(): void {
-    const formData = this.formExtractor.extractAll();
-    const preview = this.modal?.querySelector('.aiform-data-preview');
+    this.currentFormFields = this.formExtractor.extractDetailedInfo();
+    this.renderFormDataTable();
+    this.updateSelectedCount();
+  }
+
+  private renderFormDataTable(): void {
+    const tbody = this.modal?.querySelector('.aiform-data-tbody');
+    const noDataDiv = this.modal?.querySelector('.aiform-no-data') as HTMLElement;
+    const tableContainer = this.modal?.querySelector('.aiform-data-table-container') as HTMLElement;
     
-    if (preview) {
-      if (Object.keys(formData).length === 0) {
-        preview.innerHTML = '<p class="aiform-no-data">未检测到表单数据</p>';
-      } else {
-        const html = Object.entries(formData)
-          .map(([key, value]) => `
-            <div class="aiform-data-item">
-              <span class="aiform-data-key">${key}:</span>
-              <span class="aiform-data-value">${String(value)}</span>
-            </div>
-          `).join('');
-        preview.innerHTML = html;
-      }
+    if (!tbody) return;
+    
+    if (this.currentFormFields.length === 0) {
+      if (noDataDiv) noDataDiv.style.display = 'block';
+      if (tableContainer) tableContainer.style.display = 'none';
+      return;
     }
+    
+    if (noDataDiv) noDataDiv.style.display = 'none';
+    if (tableContainer) tableContainer.style.display = 'block';
+    
+    tbody.innerHTML = '';
+    
+    this.currentFormFields.forEach((field, index) => {
+      const row = document.createElement('tr');
+      row.className = 'aiform-data-row';
+      
+      // 构建状态标识
+      const statusBadges = [];
+      if (field.required) statusBadges.push('<span class="aiform-badge aiform-badge-required">必填</span>');
+      if (field.readonly) statusBadges.push('<span class="aiform-badge aiform-badge-readonly">只读</span>');
+      if (field.disabled) statusBadges.push('<span class="aiform-badge aiform-badge-disabled">禁用</span>');
+      
+      // 构建可选项显示
+      let optionsDisplay = '-';
+      if (field.options && field.options.length > 0) {
+        if (field.options.length <= 3) {
+          optionsDisplay = field.options.join(', ');
+        } else {
+          optionsDisplay = field.options.slice(0, 2).join(', ') + `... (共${field.options.length}项)`;
+        }
+      }
+      
+      row.innerHTML = `
+        <td class="aiform-checkbox-col">
+          <input type="checkbox" class="aiform-field-checkbox" data-index="${index}" 
+                 ${!field.readonly && !field.disabled && field.value ? 'checked' : ''}>
+        </td>
+        <td class="aiform-field-col">
+          <div class="aiform-field-name" title="${field.key}">${field.key}</div>
+          ${field.label ? `<div class="aiform-field-label">${field.label}</div>` : ''}
+        </td>
+        <td class="aiform-type-col">
+          <span class="aiform-type-badge">${field.type}</span>
+        </td>
+        <td class="aiform-value-col">
+          <div class="aiform-current-value" title="${field.value || ''}">${field.value || '<空>'}</div>
+          ${field.placeholder ? `<div class="aiform-placeholder">提示: ${field.placeholder}</div>` : ''}
+        </td>
+        <td class="aiform-options-col">
+          <div class="aiform-options" title="${field.options?.join(', ') || ''}">${optionsDisplay}</div>
+        </td>
+        <td class="aiform-status-col">
+          ${statusBadges.join(' ')}
+        </td>
+      `;
+      
+      tbody.appendChild(row);
+    });
+    
+    // 绑定复选框事件
+    const checkboxes = tbody.querySelectorAll('.aiform-field-checkbox');
+    checkboxes.forEach(checkbox => {
+      checkbox.addEventListener('change', () => this.updateSelectedCount());
+    });
+  }
+
+  private selectAllFields(select: boolean): void {
+    const checkboxes = this.modal?.querySelectorAll('.aiform-field-checkbox') as NodeListOf<HTMLInputElement>;
+    checkboxes?.forEach(checkbox => {
+      // 只选择非只读、非禁用且有值的字段
+      const index = parseInt(checkbox.dataset.index || '0');
+      const field = this.currentFormFields[index];
+      if (!field.readonly && !field.disabled && field.value) {
+        checkbox.checked = select;
+      }
+    });
+    this.updateSelectedCount();
+  }
+
+  private updateSelectedCount(): void {
+    const checkboxes = this.modal?.querySelectorAll('.aiform-field-checkbox:checked') as NodeListOf<HTMLInputElement>;
+    const countSpan = this.modal?.querySelector('.aiform-selected-count span');
+    if (countSpan) {
+      countSpan.textContent = checkboxes?.length.toString() || '0';
+    }
+  }
+
+  private getSelectedFields(): Record<string, any> {
+    const selectedData: Record<string, any> = {};
+    const checkboxes = this.modal?.querySelectorAll('.aiform-field-checkbox:checked') as NodeListOf<HTMLInputElement>;
+    
+    checkboxes?.forEach(checkbox => {
+      const index = parseInt(checkbox.dataset.index || '0');
+      const field = this.currentFormFields[index];
+      if (field && field.value !== null) {
+        selectedData[field.key] = field.value;
+      }
+    });
+    
+    return selectedData;
   }
 
   private loadConfig(): void {
@@ -292,11 +421,11 @@ export class UIController {
   }
 
   private async handleRewrite(): Promise<void> {
-    const formData = this.formExtractor.extractAll();
+    const selectedData = this.getSelectedFields();
     const config = this.getConfigFromUI();
     
-    if (Object.keys(formData).length === 0) {
-      this.showError('未检测到表单数据');
+    if (Object.keys(selectedData).length === 0) {
+      this.showError('请至少选择一个字段进行重写');
       return;
     }
     
@@ -305,10 +434,10 @@ export class UIController {
       return;
     }
     
-    this.showStatus('正在重写表单数据...', 'info');
+    this.showStatus(`正在重写 ${Object.keys(selectedData).length} 个字段...`, 'info');
     
     try {
-      await this.onRewrite(formData, config);
+      await this.onRewrite(selectedData, config);
       this.closeModal();
     } catch (error) {
       this.showError((error as Error).message);

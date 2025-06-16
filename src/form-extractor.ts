@@ -1,10 +1,41 @@
+import './types';
+
+export interface FormFieldInfo {
+  key: string;
+  value: string | null;
+  type: string;
+  element: HTMLElement;
+  options?: string[]; // 用于select、radio、checkbox的选项
+  placeholder?: string;
+  label?: string;
+  required?: boolean;
+  readonly?: boolean;
+  disabled?: boolean;
+}
+
 export class FormDataExtractor {
   
   /**
-   * 提取页面中所有表单数据
+   * 提取页面中所有表单数据（简化版，保持向后兼容）
    */
   extractAll(): Record<string, any> {
     const formData: Record<string, any> = {};
+    const detailedInfo = this.extractDetailedInfo();
+    
+    detailedInfo.forEach(field => {
+      if (field.key && field.value !== null && field.value !== '') {
+        formData[field.key] = field.value;
+      }
+    });
+
+    return formData;
+  }
+
+  /**
+   * 提取页面中所有表单的详细信息
+   */
+  extractDetailedInfo(): FormFieldInfo[] {
+    const formFields: FormFieldInfo[] = [];
     
     // 提取所有input元素，但排除AIForm自己的元素
     const inputs = document.querySelectorAll('input, textarea, select');
@@ -15,15 +46,118 @@ export class FormDataExtractor {
         return;
       }
       
-      const key = this.getElementKey(element);
-      const value = this.getElementValue(element);
-      
-      if (key && value !== null && value !== '') {
-        formData[key] = value;
+      const fieldInfo = this.getFieldInfo(element as HTMLElement);
+      if (fieldInfo.key) {
+        formFields.push(fieldInfo);
       }
     });
 
-    return formData;
+    return formFields;
+  }
+
+  /**
+   * 获取表单字段的详细信息
+   */
+  private getFieldInfo(element: HTMLElement): FormFieldInfo {
+    const input = element as HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement;
+    const key = this.getElementKey(element);
+    const value = this.getElementValue(element);
+    const type = this.getElementType(element);
+    const options = this.getElementOptions(element);
+    
+    return {
+      key,
+      value,
+      type,
+      element,
+      options,
+      placeholder: (input as HTMLInputElement).placeholder || undefined,
+      label: this.getElementLabel(element),
+      required: (input as HTMLInputElement).required || false,
+      readonly: this.isElementReadonly(element),
+      disabled: input.disabled || false
+    };
+  }
+
+  /**
+   * 获取元素类型的友好显示名称
+   */
+  private getElementType(element: Element): string {
+    const input = element as HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement;
+    const tagName = element.tagName.toLowerCase();
+    
+    if (tagName === 'input') {
+      const inputElement = input as HTMLInputElement;
+      switch (inputElement.type) {
+        case 'text': return '文本输入';
+        case 'email': return '邮箱输入';
+        case 'tel': return '电话输入';
+        case 'number': return '数字输入';
+        case 'password': return '密码输入';
+        case 'url': return '网址输入';
+        case 'date': return '日期选择';
+        case 'time': return '时间选择';
+        case 'datetime-local': return '日期时间';
+        case 'checkbox': return '复选框';
+        case 'radio': return '单选框';
+        case 'file': return '文件上传';
+        case 'hidden': return '隐藏字段';
+        case 'submit': return '提交按钮';
+        case 'button': return '按钮';
+        default: return `输入框 (${inputElement.type})`;
+      }
+    } else if (tagName === 'textarea') {
+      return '多行文本';
+    } else if (tagName === 'select') {
+      const selectElement = input as HTMLSelectElement;
+      return selectElement.multiple ? '多选下拉' : '单选下拉';
+    }
+    
+    return tagName;
+  }
+
+  /**
+   * 获取元素的选项（用于select、radio、checkbox）
+   */
+  private getElementOptions(element: Element): string[] | undefined {
+    const tagName = element.tagName.toLowerCase();
+    
+    if (tagName === 'select') {
+      const selectElement = element as HTMLSelectElement;
+      return Array.from(selectElement.options).map(option => option.text);
+    } else if (tagName === 'input') {
+      const inputElement = element as HTMLInputElement;
+      
+      if (inputElement.type === 'radio') {
+        // 查找同名的所有radio按钮
+        const radioGroup = document.querySelectorAll(`input[name="${inputElement.name}"][type="radio"]`);
+        return Array.from(radioGroup).map(radio => (radio as HTMLInputElement).value);
+      } else if (inputElement.type === 'checkbox') {
+        // 对于checkbox，返回当前值
+        return [inputElement.value];
+      }
+    }
+    
+    return undefined;
+  }
+
+  /**
+   * 获取元素的标签文本
+   */
+  private getElementLabel(element: Element): string | undefined {
+    const label = this.findAssociatedLabel(element as HTMLInputElement);
+    return label?.textContent?.trim() || undefined;
+  }
+
+  /**
+   * 检查元素是否只读
+   */
+  private isElementReadonly(element: Element): boolean {
+    const input = element as HTMLInputElement | HTMLTextAreaElement;
+    if (element.tagName.toLowerCase() === 'select') {
+      return false; // select元素没有readOnly属性
+    }
+    return input.readOnly || false;
   }
 
   /**

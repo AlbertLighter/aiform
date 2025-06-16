@@ -72,9 +72,9 @@ export const cssStyles = `
   background: white;
   border-radius: 12px;
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
-  width: 90%;
-  max-width: 600px;
-  max-height: 80vh;
+  width: 95%;
+  max-width: 900px;
+  max-height: 85vh;
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -159,35 +159,186 @@ export const cssStyles = `
   color: #374151;
 }
 
-.aiform-data-preview {
-  background: #f8fafc;
-  border: 1px solid #e5e7eb;
-  border-radius: 8px;
-  padding: 16px;
+.aiform-data-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   margin-bottom: 16px;
-  max-height: 200px;
-  overflow-y: auto;
 }
 
-.aiform-data-item {
+.aiform-data-controls {
   display: flex;
-  margin-bottom: 8px;
   gap: 8px;
 }
 
-.aiform-data-item:last-child {
-  margin-bottom: 0;
+.aiform-data-controls button {
+  background: #f3f4f6;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  padding: 6px 12px;
+  cursor: pointer;
+  font-size: 12px;
+  transition: all 0.2s ease;
 }
 
-.aiform-data-key {
-  font-weight: 500;
+.aiform-data-controls button:hover {
+  background: #e5e7eb;
+}
+
+.aiform-select-all {
+  background: #dbeafe !important;
+  border-color: #3b82f6 !important;
+  color: #1e40af !important;
+}
+
+.aiform-select-none {
+  background: #fee2e2 !important;
+  border-color: #ef4444 !important;
+  color: #dc2626 !important;
+}
+
+/* 表格样式 */
+.aiform-data-table-container {
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  overflow: hidden;
+  background: white;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.aiform-data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.aiform-data-table th {
+  background: #f8fafc;
+  border-bottom: 1px solid #e5e7eb;
+  padding: 12px 8px;
+  text-align: left;
+  font-weight: 600;
   color: #374151;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+.aiform-data-table td {
+  padding: 12px 8px;
+  border-bottom: 1px solid #f3f4f6;
+  vertical-align: top;
+}
+
+.aiform-data-row:hover {
+  background: #f8fafc;
+}
+
+.aiform-checkbox-col {
+  width: 50px;
+  text-align: center;
+}
+
+.aiform-field-col {
+  width: 150px;
   min-width: 120px;
 }
 
-.aiform-data-value {
-  color: #6b7280;
+.aiform-type-col {
+  width: 100px;
+}
+
+.aiform-value-col {
+  width: 200px;
+  max-width: 200px;
+}
+
+.aiform-options-col {
+  width: 150px;
+  max-width: 150px;
+}
+
+.aiform-status-col {
+  width: 120px;
+}
+
+.aiform-field-checkbox {
+  width: 16px;
+  height: 16px;
+  accent-color: #667eea;
+}
+
+.aiform-field-name {
+  font-weight: 500;
+  color: #374151;
   word-break: break-all;
+  font-size: 13px;
+}
+
+.aiform-field-label {
+  font-size: 11px;
+  color: #6b7280;
+  margin-top: 2px;
+}
+
+.aiform-type-badge {
+  background: #e0e7ff;
+  color: #3730a3;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.aiform-current-value {
+  word-break: break-all;
+  color: #374151;
+  max-height: 60px;
+  overflow: hidden;
+  line-height: 1.4;
+}
+
+.aiform-placeholder {
+  font-size: 11px;
+  color: #9ca3af;
+  margin-top: 2px;
+  font-style: italic;
+}
+
+.aiform-options {
+  word-break: break-all;
+  color: #6b7280;
+  font-size: 12px;
+  max-height: 60px;
+  overflow: hidden;
+  line-height: 1.3;
+}
+
+/* 状态标签 */
+.aiform-badge {
+  display: inline-block;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 500;
+  margin-right: 4px;
+  margin-bottom: 2px;
+}
+
+.aiform-badge-required {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.aiform-badge-readonly {
+  background: #f3f4f6;
+  color: #4b5563;
+}
+
+.aiform-badge-disabled {
+  background: #fee2e2;
+  color: #dc2626;
 }
 
 .aiform-no-data {
@@ -195,21 +346,11 @@ export const cssStyles = `
   font-style: italic;
   margin: 0;
   text-align: center;
-  padding: 20px;
+  padding: 40px 20px;
 }
 
-.aiform-refresh-data {
-  background: #f3f4f6;
-  border: 1px solid #d1d5db;
-  border-radius: 6px;
-  padding: 8px 16px;
-  cursor: pointer;
-  font-size: 14px;
-  transition: all 0.2s ease;
-}
-
-.aiform-refresh-data:hover {
-  background: #e5e7eb;
+.aiform-no-data p {
+  margin: 0;
 }
 
 /* 配置表单 */
@@ -258,11 +399,27 @@ export const cssStyles = `
 /* 模态框底部 */
 .aiform-modal-footer {
   display: flex;
-  justify-content: flex-end;
-  gap: 12px;
+  justify-content: space-between;
+  align-items: center;
   padding: 20px 24px;
   border-top: 1px solid #e5e7eb;
   background: #f8fafc;
+}
+
+.aiform-selected-count {
+  font-size: 14px;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+.aiform-selected-count span {
+  color: #667eea;
+  font-weight: 600;
+}
+
+.aiform-footer-buttons {
+  display: flex;
+  gap: 12px;
 }
 
 .aiform-button-primary,
@@ -328,9 +485,9 @@ export const cssStyles = `
 }
 
 /* 响应式设计 */
-@media (max-width: 640px) {
+@media (max-width: 768px) {
   .aiform-modal-content {
-    width: 95%;
+    width: 98%;
     max-height: 90vh;
   }
   
@@ -348,6 +505,65 @@ export const cssStyles = `
   .aiform-tab {
     padding: 10px 16px;
     font-size: 13px;
+  }
+  
+  .aiform-data-header {
+    flex-direction: column;
+    gap: 12px;
+    align-items: stretch;
+  }
+  
+  .aiform-data-controls {
+    justify-content: center;
+  }
+  
+  .aiform-modal-footer {
+    flex-direction: column;
+    gap: 12px;
+    align-items: stretch;
+  }
+  
+  .aiform-footer-buttons {
+    justify-content: stretch;
+  }
+  
+  .aiform-footer-buttons button {
+    flex: 1;
+  }
+  
+  /* 表格在移动端的优化 */
+  .aiform-data-table {
+    font-size: 12px;
+  }
+  
+  .aiform-data-table th,
+  .aiform-data-table td {
+    padding: 8px 4px;
+  }
+  
+  .aiform-field-col,
+  .aiform-value-col,
+  .aiform-options-col {
+    min-width: 100px;
+  }
+  
+  .aiform-type-col,
+  .aiform-status-col {
+    min-width: 80px;
+  }
+}
+
+@media (max-width: 640px) {
+  .aiform-data-table-container {
+    font-size: 11px;
+  }
+  
+  .aiform-field-name {
+    font-size: 12px;
+  }
+  
+  .aiform-current-value {
+    font-size: 12px;
   }
 }
 
@@ -368,25 +584,30 @@ export const cssStyles = `
 }
 
 /* 滚动条样式 */
-.aiform-data-preview::-webkit-scrollbar,
+.aiform-data-table-container::-webkit-scrollbar,
 .aiform-modal-body::-webkit-scrollbar {
   width: 6px;
+  height: 6px;
 }
 
-.aiform-data-preview::-webkit-scrollbar-track,
+.aiform-data-table-container::-webkit-scrollbar-track,
 .aiform-modal-body::-webkit-scrollbar-track {
   background: #f1f5f9;
   border-radius: 3px;
 }
 
-.aiform-data-preview::-webkit-scrollbar-thumb,
+.aiform-data-table-container::-webkit-scrollbar-thumb,
 .aiform-modal-body::-webkit-scrollbar-thumb {
   background: #cbd5e1;
   border-radius: 3px;
 }
 
-.aiform-data-preview::-webkit-scrollbar-thumb:hover,
+.aiform-data-table-container::-webkit-scrollbar-thumb:hover,
 .aiform-modal-body::-webkit-scrollbar-thumb:hover {
   background: #94a3b8;
+}
+
+.aiform-data-table-container::-webkit-scrollbar-corner {
+  background: #f1f5f9;
 }
 `; 

@@ -117,4 +117,5 @@ if (typeof window !== 'undefined') {
   }
 }
 
+// 默认导出AIForm类（保持向后兼容）
 export default AIForm; 

@@ -9,7 +9,8 @@ export default {
       file: 'dist/aiform.js',
       format: 'umd',
       name: 'AIForm',
-      sourcemap: true
+      sourcemap: true,
+      exports: 'auto'
     },
     {
       file: 'dist/aiform.esm.js',

@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AIForm 测试页面</title>
+    <title>AIForm 表格展示测试页面</title>
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            max-width: 800px;
+            max-width: 1000px;
             margin: 0 auto;
             padding: 20px;
             background: #f5f5f5;
@@ -52,12 +52,12 @@
             border-left: 4px solid #2196f3;
         }
         
-        .warning {
-            background: #fff3e0;
+        .feature-highlight {
+            background: #e8f5e8;
             padding: 15px;
             border-radius: 5px;
             margin-bottom: 20px;
-            border-left: 4px solid #ff9800;
+            border-left: 4px solid #4caf50;
         }
         
         .debug-panel {
@@ -94,94 +94,218 @@
             max-height: 200px;
             overflow-y: auto;
         }
+        
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        
+        @media (max-width: 768px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .checkbox-group input {
+            width: auto;
+        }
     </style>
 </head>
 <body>
-    <h1>🤖 AIForm 测试页面</h1>
+    <h1>🎉 AIForm 表格展示测试页面</h1>
     
-    <div class="info">
-        <h3>使用说明：</h3>
-        <ol>
-            <li>页面已自动加载AIForm，右下角会出现"AI表单"按钮</li>
-            <li>填写下面的表单（随便填一些简单内容）</li>
-            <li><strong>点击左上角的"检查表单数据"按钮验证提取结果</strong></li>
-            <li>点击"AI表单"按钮打开配置面板</li>
-            <li>在配置面板中输入你的API密钥</li>
-            <li>点击"开始重写"让AI优化你的表单内容</li>
-        </ol>
+    <div class="feature-highlight">
+        <h3>🆕 新功能特色：</h3>
+        <ul>
+            <li><strong>📊 表格展示</strong> - 用表格清晰展示所有表单字段信息</li>
+            <li><strong>🎯 选择性重写</strong> - 可以选择需要重写的特定字段</li>
+            <li><strong>🏷️ 类型识别</strong> - 显示每个字段的类型（文本输入、下拉选择等）</li>
+            <li><strong>📋 选项展示</strong> - 显示下拉框和单选框的可选项</li>
+            <li><strong>🏆 状态标识</strong> - 显示必填、只读、禁用等状态</li>
+            <li><strong>🔄 智能过滤</strong> - 自动排除AIForm自己的配置表单</li>
+        </ul>
     </div>
     
-    <div class="warning">
-        <strong>修复说明：</strong> 现在AIForm已经修复了之前会误提取自己配置表单数据的问题。左上角的调试面板可以帮你验证现在提取的数据是否正确。
+    <div class="info">
+        <h3>🚀 测试步骤：</h3>
+        <ol>
+            <li>填写下面的表单（包含各种类型的字段）</li>
+            <li>点击右下角的"AI表单"按钮</li>
+            <li>查看新的表格界面，包含字段类型、状态、可选项等详细信息</li>
+            <li>使用复选框选择要重写的字段</li>
+            <li>尝试"全选"、"全不选"功能</li>
+            <li>配置API密钥后点击"开始重写"</li>
+        </ol>
+    </div>
+
+    <div class="form-grid">
+        <div class="form-container">
+            <h2>👤 个人信息</h2>
+            
+            <div class="form-group">
+                <label for="name">姓名 *</label>
+                <input type="text" id="name" name="name" placeholder="请输入您的姓名" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="email">邮箱地址</label>
+                <input type="email" id="email" name="email" placeholder="example@domain.com">
+            </div>
+            
+            <div class="form-group">
+                <label for="phone">联系电话</label>
+                <input type="tel" id="phone" name="phone" placeholder="请输入手机号码">
+            </div>
+            
+            <div class="form-group">
+                <label for="age">年龄</label>
+                <input type="number" id="age" name="age" placeholder="请输入年龄" min="18" max="100">
+            </div>
+            
+            <div class="form-group">
+                <label for="gender">性别</label>
+                <div style="display: flex; gap: 20px; margin-top: 5px;">
+                    <label style="display: flex; align-items: center; gap: 5px;">
+                        <input type="radio" name="gender" value="male"> 男
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 5px;">
+                        <input type="radio" name="gender" value="female"> 女
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 5px;">
+                        <input type="radio" name="gender" value="other"> 其他
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-container">
+            <h2>💼 职业信息</h2>
+            
+            <div class="form-group">
+                <label for="company">公司名称 *</label>
+                <input type="text" id="company" name="company" placeholder="请输入公司名称" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="position">职位</label>
+                <input type="text" id="position" name="position" placeholder="请输入您的职位">
+            </div>
+            
+            <div class="form-group">
+                <label for="experience">工作经验</label>
+                <select id="experience" name="experience">
+                    <option value="">请选择工作经验</option>
+                    <option value="intern">实习生</option>
+                    <option value="0-1年">0-1年</option>
+                    <option value="1-3年">1-3年</option>
+                    <option value="3-5年">3-5年</option>
+                    <option value="5-10年">5-10年</option>
+                    <option value="10年以上">10年以上</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="industry">所在行业</label>
+                <select id="industry" name="industry" multiple size="4">
+                    <option value="technology">科技/互联网</option>
+                    <option value="finance">金融</option>
+                    <option value="healthcare">医疗健康</option>
+                    <option value="education">教育</option>
+                    <option value="manufacturing">制造业</option>
+                    <option value="retail">零售</option>
+                </select>
+            </div>
+        </div>
     </div>
 
     <div class="form-container">
-        <h2>个人信息表单</h2>
+        <h2>📝 项目需求</h2>
         
         <div class="form-group">
-            <label for="name">姓名：</label>
-            <input type="text" id="name" name="name" placeholder="请输入您的姓名">
+            <label for="project-title">项目标题 *</label>
+            <input type="text" id="project-title" name="project-title" placeholder="请输入项目标题" required>
         </div>
         
         <div class="form-group">
-            <label for="email">邮箱：</label>
-            <input type="email" id="email" name="email" placeholder="请输入您的邮箱">
+            <label for="project-description">项目描述</label>
+            <textarea id="project-description" name="project-description" placeholder="请详细描述您的项目需求和目标"></textarea>
         </div>
         
         <div class="form-group">
-            <label for="company">公司：</label>
-            <input type="text" id="company" name="company" placeholder="请输入您的公司">
-        </div>
-        
-        <div class="form-group">
-            <label for="position">职位：</label>
-            <input type="text" id="position" name="position" placeholder="请输入您的职位">
-        </div>
-        
-        <div class="form-group">
-            <label for="experience">工作经验：</label>
-            <select id="experience" name="experience">
-                <option value="">请选择</option>
-                <option value="1年以下">1年以下</option>
-                <option value="1-3年">1-3年</option>
-                <option value="3-5年">3-5年</option>
-                <option value="5年以上">5年以上</option>
+            <label for="budget">预算范围</label>
+            <select id="budget" name="budget">
+                <option value="">请选择预算范围</option>
+                <option value="5000以下">5000元以下</option>
+                <option value="5000-10000">5000-10000元</option>
+                <option value="10000-50000">1万-5万元</option>
+                <option value="50000-100000">5万-10万元</option>
+                <option value="100000以上">10万元以上</option>
             </select>
         </div>
         
         <div class="form-group">
-            <label for="skills">技能描述：</label>
-            <textarea id="skills" name="skills" placeholder="请简要描述您的技能和专长"></textarea>
+            <label for="start-date">期望开始时间</label>
+            <input type="date" id="start-date" name="start-date">
         </div>
         
         <div class="form-group">
-            <label for="bio">个人简介：</label>
-            <textarea id="bio" name="bio" placeholder="请写一段个人简介"></textarea>
+            <label for="deadline">期望完成时间</label>
+            <input type="date" id="deadline" name="deadline">
+        </div>
+        
+        <div class="form-group">
+            <div class="checkbox-group">
+                <input type="checkbox" id="urgent" name="urgent" value="true">
+                <label for="urgent">紧急项目</label>
+            </div>
+        </div>
+        
+        <div class="form-group">
+            <div class="checkbox-group">
+                <input type="checkbox" id="remote" name="remote" value="true">
+                <label for="remote">接受远程工作</label>
+            </div>
+        </div>
+        
+        <div class="form-group">
+            <div class="checkbox-group">
+                <input type="checkbox" id="nda" name="nda" value="true">
+                <label for="nda">需要签署保密协议</label>
+            </div>
         </div>
     </div>
 
     <div class="form-container">
-        <h2>项目需求表单</h2>
+        <h2>🔧 特殊字段测试</h2>
         
         <div class="form-group">
-            <label for="project-name">项目名称：</label>
-            <input type="text" id="project-name" name="project-name" placeholder="请输入项目名称">
+            <label for="readonly-field">只读字段</label>
+            <input type="text" id="readonly-field" name="readonly-field" value="这是只读字段" readonly>
         </div>
         
         <div class="form-group">
-            <label for="project-description">项目描述：</label>
-            <textarea id="project-description" name="project-description" placeholder="请描述您的项目需求"></textarea>
+            <label for="disabled-field">禁用字段</label>
+            <input type="text" id="disabled-field" name="disabled-field" value="这是禁用字段" disabled>
         </div>
         
         <div class="form-group">
-            <label for="budget">预算：</label>
-            <input type="text" id="budget" name="budget" placeholder="请输入预算范围">
+            <label for="password-field">密码字段（会被忽略）</label>
+            <input type="password" id="password-field" name="password-field" placeholder="密码字段不会被提取">
         </div>
         
         <div class="form-group">
-            <label for="timeline">期望完成时间：</label>
-            <input type="date" id="timeline" name="timeline">
+            <label for="file-field">文件上传（会被忽略）</label>
+            <input type="file" id="file-field" name="file-field">
         </div>
+        
+        <input type="hidden" name="hidden-field" value="隐藏字段值">
     </div>
 
     <!-- 调试面板 -->
@@ -194,13 +318,13 @@
         <div>AIForm状态: <span id="aiform-status">加载中...</span></div>
         <div>按钮状态: <span id="button-status">检查中...</span></div>
         <div class="debug-output" id="debug-output">
-            点击"检查表单数据"按钮查看AIForm提取的数据...
+            点击"检查表单数据"按钮查看AIForm提取的详细数据...
         </div>
     </div>
 
     <!-- 引入AIForm库 -->
     <script>
-        // 设置默认配置（可选）
+        // 设置默认配置
         window.AIFORM_CONFIG = {
             position: 'bottom-right',
             prompt: '请将以下表单数据重写得更加专业和详细，使其看起来像是经验丰富的专业人士填写的内容。保持JSON格式不变，但让数据更加完整和专业：'
@@ -219,24 +343,46 @@
             }
             
             try {
-                const formData = aiformInstance.extractFormData();
+                // 使用新的详细信息提取方法
+                const formFields = aiformInstance.formExtractor.extractDetailedInfo();
                 const timestamp = new Date().toLocaleTimeString();
                 
                 output.innerHTML += `<div style="border-bottom: 1px solid #ddd; margin-bottom: 5px; padding-bottom: 5px;">`;
-                output.innerHTML += `<div style="color: #666;">[${timestamp}] 提取到的表单数据:</div>`;
-                output.innerHTML += `<pre style="margin: 5px 0; white-space: pre-wrap;">${JSON.stringify(formData, null, 2)}</pre>`;
-                output.innerHTML += `<div style="color: #888; font-size: 9px;">字段数量: ${Object.keys(formData).length}</div>`;
+                output.innerHTML += `<div style="color: #666;">[${timestamp}] 检测到 ${formFields.length} 个表单字段:</div>`;
+                
+                if (formFields.length === 0) {
+                    output.innerHTML += '<div style="color: orange;">⚠️ 未检测到任何表单字段</div>';
+                } else {
+                    formFields.forEach((field, index) => {
+                        const statusBadges = [];
+                        if (field.required) statusBadges.push('必填');
+                        if (field.readonly) statusBadges.push('只读');
+                        if (field.disabled) statusBadges.push('禁用');
+                        
+                        output.innerHTML += `<div style="margin: 5px 0; padding: 5px; background: #f9f9f9; border-radius: 3px;">`;
+                        output.innerHTML += `<strong>${field.key}</strong> (${field.type})`;
+                        if (statusBadges.length > 0) {
+                            output.innerHTML += ` [${statusBadges.join(', ')}]`;
+                        }
+                        output.innerHTML += `<br>值: ${field.value || '<空>'}`;
+                        if (field.options && field.options.length > 0) {
+                            output.innerHTML += `<br>选项: ${field.options.join(', ')}`;
+                        }
+                        output.innerHTML += `</div>`;
+                    });
+                }
+                
                 output.innerHTML += `</div>`;
                 
                 // 滚动到底部
                 output.scrollTop = output.scrollHeight;
                 
                 // 检查是否包含aiform相关的数据
-                const hasAiformData = Object.keys(formData).some(key => 
-                    key.includes('aiform') || 
-                    key.includes('provider') || 
-                    key.includes('api-key') ||
-                    key.includes('model')
+                const hasAiformData = formFields.some(field => 
+                    field.key.includes('aiform') || 
+                    field.key.includes('provider') || 
+                    field.key.includes('api-key') ||
+                    field.key.includes('model')
                 );
                 
                 if (hasAiformData) {
@@ -269,8 +415,14 @@
                     
                     // 获取AIForm实例
                     if (!aiformInstance && window.AIForm) {
-                        // 查找现有实例或创建新实例用于测试
-                        aiformInstance = new window.AIForm({});
+                        // 获取现有实例
+                        const existingInstance = document.querySelector('#aiform-button')?.__aiformInstance;
+                        if (existingInstance) {
+                            aiformInstance = existingInstance;
+                        } else {
+                            // 创建测试实例（不会重复创建按钮）
+                            aiformInstance = new window.AIForm({});
+                        }
                     }
                 } else {
                     aiformStatus.textContent = '❌ 未加载';
