@@ -1,20 +1,35 @@
 {
   "name": "aiform",
   "version": "1.0.0",
-  "description": "一个智能表单填写工具，使用AI自动重写表单内容",
+  "description": "一个基于AI的智能表单填写工具，支持自动提取表单数据、AI重写优化、表单历史记录以及智能填充",
   "type": "module",
   "main": "dist/aiform.js",
   "module": "dist/aiform.esm.js",
-  "types": "dist/aiform.d.ts",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/aiform.esm.js",
+      "require": "./dist/aiform.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
   "files": [
-    "dist"
+    "dist",
+    "README.md",
+    "LICENSE"
   ],
   "scripts": {
     "build": "rollup -c",
     "dev": "rollup -c -w",
     "start": "python3 -m http.server 8000 || python -m SimpleHTTPServer 8000",
     "serve": "npm run build && npm run start",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "prepublishOnly": "npm run build",
+    "publish:npm": "npm publish",
+    "publish:beta": "npm publish --tag beta",
+    "version:patch": "npm version patch",
+    "version:minor": "npm version minor",
+    "version:major": "npm version major"
   },
   "keywords": [
     "ai",
@@ -22,10 +37,36 @@
     "automation",
     "openai",
     "deepseek",
-    "openrouter"
+    "openrouter",
+    "form-filling",
+    "ai-assistant",
+    "typescript",
+    "javascript",
+    "web-automation",
+    "form-history",
+    "form-management"
   ],
-  "author": "aiform",
+  "author": {
+    "name": "AIForm Team",
+    "email": "contact@aiform.dev",
+    "url": "https://github.com/AlbertLighter/aiform"
+  },
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AlbertLighter/aiform.git"
+  },
+  "bugs": {
+    "url": "https://github.com/AlbertLighter/aiform/issues"
+  },
+  "homepage": "https://github.com/AlbertLighter/aiform#readme",
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "browserslist": [
+    "defaults",
+    "not IE 11"
+  ],
   "devDependencies": {
     "@rollup/plugin-commonjs": "^25.0.0",
     "@rollup/plugin-node-resolve": "^15.0.0",
@@ -35,5 +76,10 @@
     "typescript": "^5.0.0",
     "tslib": "^2.6.0"
   },
-  "dependencies": {}
+  "dependencies": {},
+  "peerDependencies": {},
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  }
 } 
