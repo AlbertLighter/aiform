@@ -42,7 +42,7 @@ export class FormDataExtractor {
     
     inputs.forEach((element) => {
       // 跳过AIForm自己的元素
-      if (this.isAIFormElement(element)) {
+      if (this.isAIFormElement(element as HTMLElement)) {
         return;
       }
       
@@ -161,23 +161,25 @@ export class FormDataExtractor {
   }
 
   /**
-   * 检查元素是否属于AIForm
+   * 检查元素是否属于AIForm的UI组件
    */
-  private isAIFormElement(element: Element): boolean {
-    // 检查元素本身是否有aiform相关的类名
-    if (element.className && element.className.includes('aiform-')) {
-      return true;
-    }
-    
-    // 检查元素是否在aiform模态框内
-    let parent = element.parentElement;
-    while (parent) {
-      if (parent.id === 'aiform-modal' || 
-          parent.id === 'aiform-button' ||
-          (parent.className && parent.className.includes('aiform-'))) {
+  public isAIFormElement(element: HTMLElement): boolean {
+    // 检查元素本身或其父元素是否有aiform相关的类名
+    let current: HTMLElement | null = element;
+    while (current) {
+      if (current.className && typeof current.className === 'string') {
+        const classes = current.className.split(' ');
+        if (classes.some(cls => cls.startsWith('aiform-'))) {
+          return true;
+        }
+      }
+      
+      // 检查ID
+      if (current.id && current.id.startsWith('aiform-')) {
         return true;
       }
-      parent = parent.parentElement;
+      
+      current = current.parentElement;
     }
     
     return false;

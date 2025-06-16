@@ -1,10 +1,12 @@
 import { AIFormConfig } from './index';
 import { FormDataExtractor, FormFieldInfo } from './form-extractor';
+import { FormHistoryManager, FormHistoryEntry } from './form-history';
 
 export class UIController {
   private config: AIFormConfig;
   private onRewrite: (formData: Record<string, any>, config: Partial<AIFormConfig>) => Promise<void>;
   private formExtractor: FormDataExtractor;
+  private historyManager: FormHistoryManager;
   private button: HTMLElement | null = null;
   private modal: HTMLElement | null = null;
   private isModalOpen = false;
@@ -12,11 +14,13 @@ export class UIController {
 
   constructor(
     config: AIFormConfig, 
-    onRewrite: (formData: Record<string, any>, config: Partial<AIFormConfig>) => Promise<void>
+    onRewrite: (formData: Record<string, any>, config: Partial<AIFormConfig>) => Promise<void>,
+    historyManager: FormHistoryManager
   ) {
     this.config = config;
     this.onRewrite = onRewrite;
     this.formExtractor = new FormDataExtractor();
+    this.historyManager = historyManager;
   }
 
   render(): void {
@@ -92,6 +96,7 @@ export class UIController {
         <div class="aiform-modal-body">
           <div class="aiform-tabs">
             <button class="aiform-tab active" data-tab="data">表单数据</button>
+            <button class="aiform-tab" data-tab="history">历史记录</button>
             <button class="aiform-tab" data-tab="config">配置</button>
           </div>
           
@@ -103,6 +108,7 @@ export class UIController {
                   <button class="aiform-select-all">全选</button>
                   <button class="aiform-select-none">全不选</button>
                   <button class="aiform-refresh-data">刷新数据</button>
+                  <button class="aiform-save-current">保存当前</button>
                 </div>
               </div>
               <div class="aiform-data-table-container">
@@ -123,6 +129,25 @@ export class UIController {
                 <div class="aiform-no-data" style="display: none;">
                   <p>未检测到表单数据</p>
                 </div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="aiform-tab-content" id="aiform-history-tab" style="display: none;">
+            <div class="aiform-history-data">
+              <div class="aiform-history-header">
+                <h4>表单历史记录：</h4>
+                <div class="aiform-history-controls">
+                  <button class="aiform-restore-latest">恢复最新</button>
+                  <button class="aiform-clear-history">清空历史</button>
+                  <button class="aiform-refresh-history">刷新</button>
+                </div>
+              </div>
+              <div class="aiform-history-list">
+                <!-- 历史记录将在这里显示 -->
+              </div>
+              <div class="aiform-history-stats">
+                <!-- 存储统计信息 -->
               </div>
             </div>
           </div>
@@ -198,16 +223,28 @@ export class UIController {
       });
     });
     
-    // 刷新数据按钮
+    // 表单数据相关按钮
     const refreshButton = this.modal.querySelector('.aiform-refresh-data');
     refreshButton?.addEventListener('click', () => this.refreshFormData());
     
-    // 全选/全不选按钮
+    const saveCurrentButton = this.modal.querySelector('.aiform-save-current');
+    saveCurrentButton?.addEventListener('click', () => this.saveCurrentFormData());
+    
     const selectAllButton = this.modal.querySelector('.aiform-select-all');
     selectAllButton?.addEventListener('click', () => this.selectAllFields(true));
     
     const selectNoneButton = this.modal.querySelector('.aiform-select-none');
     selectNoneButton?.addEventListener('click', () => this.selectAllFields(false));
+    
+    // 历史记录相关按钮
+    const restoreLatestButton = this.modal.querySelector('.aiform-restore-latest');
+    restoreLatestButton?.addEventListener('click', () => this.restoreLatestHistory());
+    
+    const clearHistoryButton = this.modal.querySelector('.aiform-clear-history');
+    clearHistoryButton?.addEventListener('click', () => this.clearHistory());
+    
+    const refreshHistoryButton = this.modal.querySelector('.aiform-refresh-history');
+    refreshHistoryButton?.addEventListener('click', () => this.refreshHistory());
     
     // 测试连接按钮
     const testButton = this.modal.querySelector('.aiform-test-connection');
@@ -224,6 +261,7 @@ export class UIController {
     this.isModalOpen = true;
     this.modal.style.display = 'block';
     this.refreshFormData();
+    this.refreshHistory();
     this.loadConfig();
     
     // 动画效果
@@ -260,12 +298,167 @@ export class UIController {
       const element = content as HTMLElement;
       element.style.display = element.id === `aiform-${tabName}-tab` ? 'block' : 'none';
     });
+    
+    // 如果切换到历史记录标签，刷新历史数据
+    if (tabName === 'history') {
+      this.refreshHistory();
+    }
   }
 
   private refreshFormData(): void {
     this.currentFormFields = this.formExtractor.extractDetailedInfo();
     this.renderFormDataTable();
     this.updateSelectedCount();
+  }
+
+  private saveCurrentFormData(): void {
+    const formData = this.formExtractor.extractAll();
+    const success = this.historyManager.saveFormData(formData);
+    
+    if (success) {
+      this.showStatus('表单数据已保存到历史记录', 'success');
+      this.refreshHistory();
+    } else {
+      this.showStatus('保存失败：没有有效的表单数据', 'error');
+    }
+  }
+
+  private refreshHistory(): void {
+    this.renderHistoryList();
+    this.renderHistoryStats();
+  }
+
+  private renderHistoryList(): void {
+    const historyList = this.modal?.querySelector('.aiform-history-list');
+    if (!historyList) return;
+    
+    const currentPageHistory = this.historyManager.getCurrentPageHistory();
+    
+    if (currentPageHistory.length === 0) {
+      historyList.innerHTML = `
+        <div class="aiform-no-history">
+          <p>当前页面还没有历史记录</p>
+          <p>填写表单后会自动保存历史数据</p>
+        </div>
+      `;
+      return;
+    }
+    
+    // 按时间排序
+    const sortedHistory = currentPageHistory.sort((a, b) => b.timestamp - a.timestamp);
+    
+    historyList.innerHTML = sortedHistory.map((entry, index) => `
+      <div class="aiform-history-item" data-id="${entry.id}">
+        <div class="aiform-history-main">
+          <div class="aiform-history-info">
+            <div class="aiform-history-time">${this.historyManager.formatTimestamp(entry.timestamp)}</div>
+            <div class="aiform-history-fields">${entry.fieldCount} 个字段</div>
+          </div>
+          <div class="aiform-history-preview">
+            ${this.formatHistoryData(entry.data)}
+          </div>
+        </div>
+        <div class="aiform-history-actions">
+          <button class="aiform-history-restore" title="恢复此记录">恢复</button>
+          <button class="aiform-history-delete" title="删除此记录">删除</button>
+        </div>
+      </div>
+    `).join('');
+    
+    // 绑定历史记录操作事件
+    historyList.querySelectorAll('.aiform-history-restore').forEach((btn, index) => {
+      btn.addEventListener('click', () => this.restoreHistoryEntry(sortedHistory[index]));
+    });
+    
+    historyList.querySelectorAll('.aiform-history-delete').forEach((btn, index) => {
+      btn.addEventListener('click', () => this.deleteHistoryEntry(sortedHistory[index].id));
+    });
+  }
+
+  private formatHistoryData(data: Record<string, any>): string {
+    const entries = Object.entries(data);
+    if (entries.length <= 3) {
+      return entries.map(([key, value]) => `${key}: ${String(value).substring(0, 20)}`).join(', ');
+    } else {
+      const preview = entries.slice(0, 2).map(([key, value]) => `${key}: ${String(value).substring(0, 15)}`).join(', ');
+      return `${preview}... 等${entries.length}项`;
+    }
+  }
+
+  private renderHistoryStats(): void {
+    const statsContainer = this.modal?.querySelector('.aiform-history-stats');
+    if (!statsContainer) return;
+    
+    const allHistory = this.historyManager.getAllHistory();
+    const currentPageHistory = this.historyManager.getCurrentPageHistory();
+    const storageInfo = this.historyManager.getStorageInfo();
+    
+    const usedMB = (storageInfo.used / (1024 * 1024)).toFixed(2);
+    const totalMB = (storageInfo.total / (1024 * 1024)).toFixed(0);
+    
+    statsContainer.innerHTML = `
+      <div class="aiform-storage-stats">
+        <div class="aiform-stat-item">
+          <span class="aiform-stat-label">当前页面:</span>
+          <span class="aiform-stat-value">${currentPageHistory.length} 条记录</span>
+        </div>
+        <div class="aiform-stat-item">
+          <span class="aiform-stat-label">全部历史:</span>
+          <span class="aiform-stat-value">${allHistory.length} 条记录</span>
+        </div>
+        <div class="aiform-stat-item">
+          <span class="aiform-stat-label">存储使用:</span>
+          <span class="aiform-stat-value">${usedMB}MB / ${totalMB}MB</span>
+        </div>
+      </div>
+    `;
+  }
+
+  private restoreLatestHistory(): void {
+    const latestData = this.historyManager.getLatestFormData();
+    if (latestData) {
+      // 这里需要调用外部的填充函数
+      this.restoreFormData(latestData);
+      this.showStatus('已恢复最新的历史数据', 'success');
+      this.closeModal();
+    } else {
+      this.showStatus('没有找到历史数据', 'error');
+    }
+  }
+
+  private restoreHistoryEntry(entry: FormHistoryEntry): void {
+    this.restoreFormData(entry.data);
+    this.showStatus('已恢复历史数据', 'success');
+    this.closeModal();
+  }
+
+  private deleteHistoryEntry(id: string): void {
+    const success = this.historyManager.deleteHistoryEntry(id);
+    if (success) {
+      this.showStatus('历史记录已删除', 'success');
+      this.refreshHistory();
+    } else {
+      this.showStatus('删除失败', 'error');
+    }
+  }
+
+  private clearHistory(): void {
+    if (confirm('确定要清空当前页面的所有历史记录吗？此操作不可恢复。')) {
+      const success = this.historyManager.clearCurrentPageHistory();
+      if (success) {
+        this.showStatus('历史记录已清空', 'success');
+        this.refreshHistory();
+      } else {
+        this.showStatus('清空失败', 'error');
+      }
+    }
+  }
+
+  private restoreFormData(data: Record<string, any>): void {
+    // 需要访问外部的表单填充器
+    // 这里我们派发一个自定义事件
+    const event = new CustomEvent('aiform-restore-data', { detail: data });
+    document.dispatchEvent(event);
   }
 
   private renderFormDataTable(): void {

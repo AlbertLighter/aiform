@@ -164,25 +164,30 @@ export const cssStyles = `
   justify-content: space-between;
   align-items: center;
   margin-bottom: 16px;
+  flex-wrap: wrap;
+  gap: 12px;
 }
 
 .aiform-data-controls {
   display: flex;
   gap: 8px;
+  flex-wrap: wrap;
 }
 
 .aiform-data-controls button {
-  background: #f3f4f6;
-  border: 1px solid #d1d5db;
-  border-radius: 6px;
   padding: 6px 12px;
-  cursor: pointer;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  background: white;
+  color: #374151;
   font-size: 12px;
+  cursor: pointer;
   transition: all 0.2s ease;
 }
 
 .aiform-data-controls button:hover {
-  background: #e5e7eb;
+  background: #f9fafb;
+  border-color: #9ca3af;
 }
 
 .aiform-select-all {
@@ -609,5 +614,191 @@ export const cssStyles = `
 
 .aiform-data-table-container::-webkit-scrollbar-corner {
   background: #f1f5f9;
+}
+
+/* 历史记录样式 */
+.aiform-history-data {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.aiform-history-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.aiform-history-controls {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.aiform-history-controls button {
+  padding: 6px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  background: white;
+  color: #374151;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.aiform-history-controls button:hover {
+  background: #f9fafb;
+  border-color: #9ca3af;
+}
+
+.aiform-restore-latest {
+  background: #667eea !important;
+  color: white !important;
+  border-color: #667eea !important;
+}
+
+.aiform-restore-latest:hover {
+  background: #5a67d8 !important;
+}
+
+.aiform-history-list {
+  flex: 1;
+  overflow-y: auto;
+  max-height: 300px;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  margin-bottom: 16px;
+}
+
+.aiform-no-history {
+  padding: 40px 20px;
+  text-align: center;
+  color: #6b7280;
+}
+
+.aiform-no-history p {
+  margin: 8px 0;
+}
+
+.aiform-history-item {
+  display: flex;
+  align-items: center;
+  padding: 12px 16px;
+  border-bottom: 1px solid #f3f4f6;
+  transition: background-color 0.2s ease;
+}
+
+.aiform-history-item:hover {
+  background: #f9fafb;
+}
+
+.aiform-history-item:last-child {
+  border-bottom: none;
+}
+
+.aiform-history-main {
+  flex: 1;
+  min-width: 0;
+}
+
+.aiform-history-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 4px;
+}
+
+.aiform-history-time {
+  font-weight: 500;
+  color: #374151;
+  font-size: 13px;
+}
+
+.aiform-history-fields {
+  font-size: 12px;
+  color: #6b7280;
+  background: #f3f4f6;
+  padding: 2px 6px;
+  border-radius: 3px;
+}
+
+.aiform-history-preview {
+  font-size: 12px;
+  color: #6b7280;
+  line-height: 1.4;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.aiform-history-actions {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.aiform-history-restore,
+.aiform-history-delete {
+  padding: 4px 8px;
+  border: 1px solid #d1d5db;
+  border-radius: 3px;
+  font-size: 11px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.aiform-history-restore {
+  background: #667eea;
+  color: white;
+  border-color: #667eea;
+}
+
+.aiform-history-restore:hover {
+  background: #5a67d8;
+}
+
+.aiform-history-delete {
+  background: white;
+  color: #ef4444;
+  border-color: #fecaca;
+}
+
+.aiform-history-delete:hover {
+  background: #fef2f2;
+}
+
+.aiform-history-stats {
+  border-top: 1px solid #e5e7eb;
+  padding-top: 12px;
+}
+
+.aiform-storage-stats {
+  display: flex;
+  gap: 20px;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+
+.aiform-stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.aiform-stat-label {
+  font-size: 11px;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.aiform-stat-value {
+  font-size: 13px;
+  font-weight: 600;
+  color: #374151;
 }
 `; 
