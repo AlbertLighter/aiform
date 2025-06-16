@@ -1,5 +1,5 @@
 {
-  "name": "aiform",
+  "name": "@albertlighter/aiform",
   "version": "1.0.0",
   "description": "一个基于AI的智能表单填写工具，支持自动提取表单数据、AI重写优化、表单历史记录以及智能填充",
   "type": "module",

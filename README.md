@@ -17,9 +17,8 @@ AIForm 是一个基于人工智能的表单自动填写工具，能够智能分�
 
 ### 1. 安装
 
-#### 通过 npm 安装
 ```bash
-npm install aiform
+npm install @albertlighter/aiform
 ```
 
 #### 通过 CDN 引入
@@ -55,7 +54,7 @@ npm install aiform
 
 #### JavaScript 模块使用
 ```javascript
-import AIForm from 'aiform';
+import AIForm from '@albertlighter/aiform';
 
 // 创建实例
 const aiform = new AIForm({
@@ -69,7 +68,7 @@ const aiform = new AIForm({
 #### React 中使用
 ```jsx
 import React, { useEffect } from 'react';
-import AIForm from 'aiform';
+import AIForm from '@albertlighter/aiform';
 
 function App() {
     useEffect(() => {
@@ -105,7 +104,7 @@ function App() {
 </template>
 
 <script>
-import AIForm from 'aiform';
+import AIForm from '@albertlighter/aiform';
 
 export default {
     data() {
