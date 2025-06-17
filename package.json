@@ -1,6 +1,6 @@
 {
   "name": "@albertlighter/aiform",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "一个基于AI的智能表单填写工具，支持自动提取表单数据、AI重写优化、表单历史记录以及智能填充。同时支持npm包和浏览器插件使用。",
   "type": "module",
   "main": "dist/npm/aiform.js",
@@ -91,4 +91,4 @@
     "access": "public",
     "registry": "https://registry.npmjs.org/"
   }
-} 
+}
