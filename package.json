@@ -1,35 +1,40 @@
 {
   "name": "@albertlighter/aiform",
   "version": "1.0.0",
-  "description": "一个基于AI的智能表单填写工具，支持自动提取表单数据、AI重写优化、表单历史记录以及智能填充",
+  "description": "一个基于AI的智能表单填写工具，支持自动提取表单数据、AI重写优化、表单历史记录以及智能填充。同时支持npm包和浏览器插件使用。",
   "type": "module",
-  "main": "dist/aiform.js",
-  "module": "dist/aiform.esm.js",
-  "types": "dist/index.d.ts",
+  "main": "dist/npm/aiform.js",
+  "module": "dist/npm/aiform.esm.js",
+  "types": "dist/npm/index.d.ts",
   "exports": {
     ".": {
-      "import": "./dist/aiform.esm.js",
-      "require": "./dist/aiform.js",
-      "types": "./dist/index.d.ts"
+      "import": "./dist/npm/aiform.esm.js",
+      "require": "./dist/npm/aiform.js",
+      "types": "./dist/npm/index.d.ts"
     }
   },
   "files": [
-    "dist",
+    "dist/npm",
     "README.md",
     "LICENSE"
   ],
   "scripts": {
-    "build": "rollup -c",
-    "dev": "rollup -c -w",
+    "build": "npm run build:npm",
+    "build:npm": "rollup -c build/rollup.npm.js",
+    "build:extension": "rollup -c build/rollup.extension.js",
+    "build:all": "npm run build:npm && npm run build:extension",
+    "dev": "rollup -c build/rollup.npm.js -w",
+    "dev:extension": "rollup -c build/rollup.extension.js -w",
     "start": "python3 -m http.server 8000 || python -m SimpleHTTPServer 8000",
     "serve": "npm run build && npm run start",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "prepublishOnly": "npm run build",
+    "prepublishOnly": "npm run build:npm",
     "publish:npm": "npm publish",
     "publish:beta": "npm publish --tag beta",
     "version:patch": "npm version patch",
     "version:minor": "npm version minor",
-    "version:major": "npm version major"
+    "version:major": "npm version major",
+    "package:extension": "npm run build:extension && cd dist/extension && zip -r ../aiform-extension.zip ."
   },
   "keywords": [
     "ai",
@@ -44,7 +49,10 @@
     "javascript",
     "web-automation",
     "form-history",
-    "form-management"
+    "form-management",
+    "browser-extension",
+    "chrome-extension",
+    "firefox-extension"
   ],
   "author": {
     "name": "AIForm Team",
@@ -71,6 +79,7 @@
     "@rollup/plugin-commonjs": "^25.0.0",
     "@rollup/plugin-node-resolve": "^15.0.0",
     "@rollup/plugin-typescript": "^11.0.0",
+    "rollup-plugin-copy": "^3.5.0",
     "rollup": "^4.0.0",
     "rollup-plugin-string": "^3.0.0",
     "typescript": "^5.0.0",
