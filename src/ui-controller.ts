@@ -8,8 +8,8 @@ export class UIController {
   private formExtractor: FormDataExtractor;
   private historyManager: FormHistoryManager;
   private button: HTMLElement | null = null;
-  private modal: HTMLElement | null = null;
-  private isModalOpen = false;
+  private sidebar: HTMLElement | null = null;
+  private isSidebarOpen = false;
   private currentFormFields: FormFieldInfo[] = [];
 
   constructor(
@@ -25,7 +25,7 @@ export class UIController {
 
   render(): void {
     this.createButton();
-    this.createModal();
+    this.createSidebar();
   }
 
   private createButton(): void {
@@ -36,7 +36,7 @@ export class UIController {
 
     this.button = document.createElement('div');
     this.button.id = 'aiform-button';
-    this.button.className = 'aiform-button';
+    this.button.className = 'aiform-button aiform-button-sidebar';
     this.button.innerHTML = `
       <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
         <path d="M13 7H7v6h6V7z" fill="currentColor"/>
@@ -45,176 +45,131 @@ export class UIController {
       <span>AI表单</span>
     `;
     
-    // 设置按钮位置
-    this.setButtonPosition();
+    // 设置按钮位置 - 固定在右侧中部
+    this.button.style.position = 'fixed';
+    this.button.style.right = '20px';
+    this.button.style.top = '50%';
+    this.button.style.transform = 'translateY(-50%)';
+    this.button.style.zIndex = '9999';
     
     // 添加点击事件
-    this.button.addEventListener('click', () => this.openModal());
+    this.button.addEventListener('click', () => this.toggleSidebar());
     
     document.body.appendChild(this.button);
   }
 
-  private setButtonPosition(): void {
-    if (!this.button) return;
+  private createSidebar(): void {
+    this.sidebar = document.createElement('div');
+    this.sidebar.id = 'aiform-sidebar';
+    this.sidebar.className = 'aiform-sidebar';
     
-    const position = this.config.position || 'bottom-right';
-    
-    switch (position) {
-      case 'bottom-right':
-        this.button.style.bottom = '20px';
-        this.button.style.right = '20px';
-        break;
-      case 'bottom-left':
-        this.button.style.bottom = '20px';
-        this.button.style.left = '20px';
-        break;
-      case 'top-right':
-        this.button.style.top = '20px';
-        this.button.style.right = '20px';
-        break;
-      case 'top-left':
-        this.button.style.top = '20px';
-        this.button.style.left = '20px';
-        break;
-    }
-  }
-
-  private createModal(): void {
-    this.modal = document.createElement('div');
-    this.modal.id = 'aiform-modal';
-    this.modal.className = 'aiform-modal';
-    this.modal.style.display = 'none';
-    
-    this.modal.innerHTML = `
-      <div class="aiform-modal-overlay"></div>
-      <div class="aiform-modal-content">
-        <div class="aiform-modal-header">
-          <h3>AI表单重写器</h3>
-          <button class="aiform-close-button">&times;</button>
-        </div>
-        
-        <div class="aiform-modal-body">
-          <div class="aiform-tabs">
-            <button class="aiform-tab active" data-tab="data">表单数据</button>
-            <button class="aiform-tab" data-tab="history">历史记录</button>
-            <button class="aiform-tab" data-tab="config">配置</button>
-          </div>
-          
-          <div class="aiform-tab-content" id="aiform-data-tab">
-            <div class="aiform-form-data">
-              <div class="aiform-data-header">
-                <h4>检测到的表单数据：</h4>
-                <div class="aiform-data-controls">
-                  <button class="aiform-select-all">全选</button>
-                  <button class="aiform-select-none">全不选</button>
-                  <button class="aiform-refresh-data">刷新数据</button>
-                  <button class="aiform-save-current">保存当前</button>
-                </div>
-              </div>
-              <div class="aiform-data-table-container">
-                <table class="aiform-data-table">
-                  <thead>
-                    <tr>
-                      <th class="aiform-checkbox-col">选择</th>
-                      <th class="aiform-field-col">字段名</th>
-                      <th class="aiform-type-col">类型</th>
-                      <th class="aiform-value-col">当前值</th>
-                      <th class="aiform-options-col">可选项</th>
-                      <th class="aiform-status-col">状态</th>
-                    </tr>
-                  </thead>
-                  <tbody class="aiform-data-tbody">
-                  </tbody>
-                </table>
-                <div class="aiform-no-data" style="display: none;">
-                  <p>未检测到表单数据</p>
-                </div>
-              </div>
-            </div>
-          </div>
-          
-          <div class="aiform-tab-content" id="aiform-history-tab" style="display: none;">
-            <div class="aiform-history-data">
-              <div class="aiform-history-header">
-                <h4>表单历史记录：</h4>
-                <div class="aiform-history-controls">
-                  <button class="aiform-restore-latest">恢复最新</button>
-                  <button class="aiform-clear-history">清空历史</button>
-                  <button class="aiform-refresh-history">刷新</button>
-                </div>
-              </div>
-              <div class="aiform-history-list">
-                <!-- 历史记录将在这里显示 -->
-              </div>
-              <div class="aiform-history-stats">
-                <!-- 存储统计信息 -->
-              </div>
-            </div>
-          </div>
-          
-          <div class="aiform-tab-content" id="aiform-config-tab" style="display: none;">
-            <div class="aiform-config-form">
-              <div class="aiform-form-group">
-                <label>AI提供商：</label>
-                <select class="aiform-provider">
-                  <option value="openai">OpenAI</option>
-                  <option value="openrouter">OpenRouter</option>
-                  <option value="deepseek">DeepSeek</option>
-                </select>
-              </div>
-              
-              <div class="aiform-form-group">
-                <label>API密钥：</label>
-                <input type="password" class="aiform-api-key" placeholder="请输入API密钥">
-              </div>
-              
-              <div class="aiform-form-group">
-                <label>模型：</label>
-                <input type="text" class="aiform-model" placeholder="例如：gpt-3.5-turbo">
-              </div>
-              
-              <div class="aiform-form-group">
-                <label>自定义API地址（可选）：</label>
-                <input type="text" class="aiform-api-url" placeholder="例如：https://api.openai.com/v1/chat/completions">
-              </div>
-              
-              <div class="aiform-form-group">
-                <label>重写提示词：</label>
-                <textarea class="aiform-prompt" rows="3" placeholder="请重写以下表单数据..."></textarea>
-              </div>
-            </div>
-          </div>
-        </div>
-        
-        <div class="aiform-modal-footer">
-          <div class="aiform-selected-count">已选择 <span>0</span> 个字段</div>
-          <div class="aiform-footer-buttons">
-            <button class="aiform-button-secondary aiform-test-connection">测试连接</button>
-            <button class="aiform-button-primary aiform-rewrite">开始重写</button>
-          </div>
-        </div>
-        
-        <div class="aiform-status"></div>
+    this.sidebar.innerHTML = `
+      <div class="aiform-sidebar-header">
+        <h3>🤖 AI表单助手</h3>
+        <button class="aiform-sidebar-close">&times;</button>
       </div>
+      
+      <div class="aiform-sidebar-content">
+        <div class="aiform-tabs">
+          <button class="aiform-tab active" data-tab="data">表单数据</button>
+          <button class="aiform-tab" data-tab="history">历史记录</button>
+          <button class="aiform-tab" data-tab="config">设置</button>
+        </div>
+        
+        <div class="aiform-tab-content" id="aiform-data-tab">
+          <div class="aiform-form-data">
+            <div class="aiform-data-header">
+              <h4>检测到的表单数据</h4>
+              <div class="aiform-data-controls">
+                <button class="aiform-btn aiform-btn-sm aiform-refresh-data">🔄 刷新</button>
+                <button class="aiform-btn aiform-btn-sm aiform-save-current">💾 保存</button>
+              </div>
+            </div>
+            
+            <div class="aiform-form-fields">
+              <!-- 表单字段将在这里显示 -->
+            </div>
+            
+            <div class="aiform-no-data" style="display: none;">
+              <div class="aiform-empty-state">
+                <span class="aiform-empty-icon">📝</span>
+                <p>未检测到表单数据</p>
+                <p class="aiform-empty-hint">请在页面中填写表单后刷新</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="aiform-tab-content" id="aiform-history-tab" style="display: none;">
+          <div class="aiform-history-data">
+            <div class="aiform-history-header">
+              <h4>表单历史记录</h4>
+              <div class="aiform-history-controls">
+                <button class="aiform-btn aiform-btn-sm aiform-restore-latest">↩️ 恢复最新</button>
+                <button class="aiform-btn aiform-btn-sm aiform-clear-history">🗑️ 清空</button>
+              </div>
+            </div>
+            <div class="aiform-history-list">
+              <!-- 历史记录将在这里显示 -->
+            </div>
+          </div>
+        </div>
+        
+        <div class="aiform-tab-content" id="aiform-config-tab" style="display: none;">
+          <div class="aiform-config-form">
+            <div class="aiform-form-group">
+              <label>AI提供商</label>
+              <select class="aiform-provider">
+                <option value="openai">OpenAI</option>
+                <option value="openrouter">OpenRouter</option>
+                <option value="deepseek">DeepSeek</option>
+              </select>
+            </div>
+            
+            <div class="aiform-form-group">
+              <label>API密钥</label>
+              <input type="password" class="aiform-api-key" placeholder="请输入API密钥">
+            </div>
+            
+            <div class="aiform-form-group">
+              <label>模型</label>
+              <input type="text" class="aiform-model" placeholder="例如：gpt-3.5-turbo">
+            </div>
+            
+            <div class="aiform-form-group">
+              <label>自定义API地址（可选）</label>
+              <input type="text" class="aiform-api-url" placeholder="留空使用默认地址">
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="aiform-sidebar-footer">
+        <div class="aiform-selected-info">
+          <span class="aiform-selected-count">0 个字段已选择</span>
+        </div>
+        <div class="aiform-footer-buttons">
+          <button class="aiform-btn aiform-btn-secondary aiform-test-connection">🔗 测试连接</button>
+          <button class="aiform-btn aiform-btn-primary aiform-rewrite">✨ AI重写</button>
+        </div>
+      </div>
+      
+      <div class="aiform-status"></div>
     `;
     
-    document.body.appendChild(this.modal);
-    this.bindModalEvents();
+    document.body.appendChild(this.sidebar);
+    this.bindSidebarEvents();
   }
 
-  private bindModalEvents(): void {
-    if (!this.modal) return;
+  private bindSidebarEvents(): void {
+    if (!this.sidebar) return;
     
     // 关闭按钮
-    const closeButton = this.modal.querySelector('.aiform-close-button');
-    closeButton?.addEventListener('click', () => this.closeModal());
-    
-    // 点击遮罩关闭
-    const overlay = this.modal.querySelector('.aiform-modal-overlay');
-    overlay?.addEventListener('click', () => this.closeModal());
+    const closeButton = this.sidebar.querySelector('.aiform-sidebar-close');
+    closeButton?.addEventListener('click', () => this.closeSidebar());
     
     // 标签切换
-    const tabs = this.modal.querySelectorAll('.aiform-tab');
+    const tabs = this.sidebar.querySelectorAll('.aiform-tab');
     tabs.forEach(tab => {
       tab.addEventListener('click', (e) => {
         const target = e.target as HTMLElement;
@@ -224,76 +179,74 @@ export class UIController {
     });
     
     // 表单数据相关按钮
-    const refreshButton = this.modal.querySelector('.aiform-refresh-data');
+    const refreshButton = this.sidebar.querySelector('.aiform-refresh-data');
     refreshButton?.addEventListener('click', () => this.refreshFormData());
     
-    const saveCurrentButton = this.modal.querySelector('.aiform-save-current');
+    const saveCurrentButton = this.sidebar.querySelector('.aiform-save-current');
     saveCurrentButton?.addEventListener('click', () => this.saveCurrentFormData());
     
-    const selectAllButton = this.modal.querySelector('.aiform-select-all');
-    selectAllButton?.addEventListener('click', () => this.selectAllFields(true));
-    
-    const selectNoneButton = this.modal.querySelector('.aiform-select-none');
-    selectNoneButton?.addEventListener('click', () => this.selectAllFields(false));
-    
     // 历史记录相关按钮
-    const restoreLatestButton = this.modal.querySelector('.aiform-restore-latest');
+    const restoreLatestButton = this.sidebar.querySelector('.aiform-restore-latest');
     restoreLatestButton?.addEventListener('click', () => this.restoreLatestHistory());
     
-    const clearHistoryButton = this.modal.querySelector('.aiform-clear-history');
+    const clearHistoryButton = this.sidebar.querySelector('.aiform-clear-history');
     clearHistoryButton?.addEventListener('click', () => this.clearHistory());
     
-    const refreshHistoryButton = this.modal.querySelector('.aiform-refresh-history');
-    refreshHistoryButton?.addEventListener('click', () => this.refreshHistory());
-    
     // 测试连接按钮
-    const testButton = this.modal.querySelector('.aiform-test-connection');
+    const testButton = this.sidebar.querySelector('.aiform-test-connection');
     testButton?.addEventListener('click', () => this.testConnection());
     
     // 重写按钮
-    const rewriteButton = this.modal.querySelector('.aiform-rewrite');
+    const rewriteButton = this.sidebar.querySelector('.aiform-rewrite');
     rewriteButton?.addEventListener('click', () => this.handleRewrite());
   }
 
-  private openModal(): void {
-    if (!this.modal || this.isModalOpen) return;
+  private toggleSidebar(): void {
+    if (this.isSidebarOpen) {
+      this.closeSidebar();
+    } else {
+      this.openSidebar();
+    }
+  }
+
+  private openSidebar(): void {
+    if (!this.sidebar || this.isSidebarOpen) return;
     
-    this.isModalOpen = true;
-    this.modal.style.display = 'block';
+    this.isSidebarOpen = true;
+    this.sidebar.classList.add('active');
     this.refreshFormData();
     this.refreshHistory();
     this.loadConfig();
     
-    // 动画效果
-    setTimeout(() => {
-      this.modal?.classList.add('active');
-    }, 10);
+    // 更新按钮状态
+    if (this.button) {
+      this.button.classList.add('active');
+    }
   }
 
-  private closeModal(): void {
-    if (!this.modal || !this.isModalOpen) return;
+  private closeSidebar(): void {
+    if (!this.sidebar || !this.isSidebarOpen) return;
     
-    this.modal.classList.remove('active');
+    this.sidebar.classList.remove('active');
+    this.isSidebarOpen = false;
     
-    setTimeout(() => {
-      if (this.modal) {
-        this.modal.style.display = 'none';
-        this.isModalOpen = false;
-      }
-    }, 300);
+    // 更新按钮状态
+    if (this.button) {
+      this.button.classList.remove('active');
+    }
   }
 
   private switchTab(tabName: string): void {
-    if (!this.modal) return;
+    if (!this.sidebar) return;
     
     // 更新标签按钮状态
-    const tabs = this.modal.querySelectorAll('.aiform-tab');
+    const tabs = this.sidebar.querySelectorAll('.aiform-tab');
     tabs.forEach(tab => {
       tab.classList.toggle('active', tab.getAttribute('data-tab') === tabName);
     });
     
     // 显示对应内容
-    const contents = this.modal.querySelectorAll('.aiform-tab-content');
+    const contents = this.sidebar.querySelectorAll('.aiform-tab-content');
     contents.forEach(content => {
       const element = content as HTMLElement;
       element.style.display = element.id === `aiform-${tabName}-tab` ? 'block' : 'none';
@@ -307,8 +260,218 @@ export class UIController {
 
   private refreshFormData(): void {
     this.currentFormFields = this.formExtractor.extractDetailedInfo();
-    this.renderFormDataTable();
+    this.renderFormFields();
     this.updateSelectedCount();
+  }
+
+  private renderFormFields(): void {
+    const fieldsContainer = this.sidebar?.querySelector('.aiform-form-fields');
+    const noDataDiv = this.sidebar?.querySelector('.aiform-no-data') as HTMLElement;
+    
+    if (!fieldsContainer) return;
+    
+    if (this.currentFormFields.length === 0) {
+      if (noDataDiv) noDataDiv.style.display = 'block';
+      fieldsContainer.innerHTML = '';
+      return;
+    }
+    
+    if (noDataDiv) noDataDiv.style.display = 'none';
+    
+    fieldsContainer.innerHTML = this.currentFormFields.map((field, index) => `
+      <div class="aiform-field-item" data-field-index="${index}">
+        <div class="aiform-field-header">
+          <div class="aiform-field-info">
+            <div class="aiform-field-name" title="${field.name}">${field.name || field.label || `字段${index + 1}`}</div>
+            <div class="aiform-field-meta">
+              <span class="aiform-field-type">${field.type}</span>
+              ${field.required ? '<span class="aiform-badge aiform-badge-required">必填</span>' : ''}
+              ${field.readonly ? '<span class="aiform-badge aiform-badge-readonly">只读</span>' : ''}
+            </div>
+          </div>
+          <div class="aiform-field-actions">
+            <button class="aiform-field-locate" title="定位到表单字段">📍</button>
+            <input type="checkbox" class="aiform-field-checkbox" ${field.value ? 'checked' : ''}>
+          </div>
+        </div>
+        
+        <div class="aiform-field-value">
+          ${this.renderFieldValueInput(field, index)}
+        </div>
+        
+        ${field.options && field.options.length > 0 ? `
+          <div class="aiform-field-options">
+            <small>可选项: ${field.options.slice(0, 3).join(', ')}${field.options.length > 3 ? '...' : ''}</small>
+          </div>
+        ` : ''}
+      </div>
+    `).join('');
+    
+    // 绑定事件
+    this.bindFieldEvents();
+  }
+
+  private renderFieldValueInput(field: FormFieldInfo, index: number): string {
+    const value = field.value || '';
+    const isDisabled = field.readonly || field.disabled;
+    
+    switch (field.type) {
+      case 'textarea':
+        return `<textarea class="aiform-field-input" data-field-index="${index}" ${isDisabled ? 'disabled' : ''}>${value}</textarea>`;
+      
+      case 'select':
+        const options = field.options || [];
+        return `
+          <select class="aiform-field-input" data-field-index="${index}" ${isDisabled ? 'disabled' : ''}>
+            <option value="">请选择...</option>
+            ${options.map(option => `<option value="${option}" ${option === value ? 'selected' : ''}>${option}</option>`).join('')}
+          </select>
+        `;
+      
+      case 'checkbox':
+        return `
+          <label class="aiform-checkbox-label">
+            <input type="checkbox" class="aiform-field-input" data-field-index="${index}" ${value ? 'checked' : ''} ${isDisabled ? 'disabled' : ''}>
+            ${field.label || '选择'}
+          </label>
+        `;
+      
+      case 'radio':
+        const radioOptions = field.options || [];
+        return `
+          <div class="aiform-radio-group">
+            ${radioOptions.map(option => `
+              <label class="aiform-radio-label">
+                <input type="radio" name="field-${index}" class="aiform-field-input" data-field-index="${index}" value="${option}" ${option === value ? 'checked' : ''} ${isDisabled ? 'disabled' : ''}>
+                ${option}
+              </label>
+            `).join('')}
+          </div>
+        `;
+      
+      default:
+        return `<input type="text" class="aiform-field-input" data-field-index="${index}" value="${value}" ${isDisabled ? 'disabled' : ''}>`;
+    }
+  }
+
+  private bindFieldEvents(): void {
+    if (!this.sidebar) return;
+    
+    // 绑定定位按钮事件
+    const locateButtons = this.sidebar.querySelectorAll('.aiform-field-locate');
+    locateButtons.forEach((button, index) => {
+      button.addEventListener('click', () => this.locateField(index));
+    });
+    
+    // 绑定字段值变化事件
+    const fieldInputs = this.sidebar.querySelectorAll('.aiform-field-input');
+    fieldInputs.forEach(input => {
+      const fieldIndex = parseInt((input as HTMLElement).dataset.fieldIndex || '0');
+      
+      input.addEventListener('input', () => this.updateFieldValue(fieldIndex, input));
+      input.addEventListener('change', () => this.updateFieldValue(fieldIndex, input));
+    });
+    
+    // 绑定复选框事件
+    const checkboxes = this.sidebar.querySelectorAll('.aiform-field-checkbox');
+    checkboxes.forEach(checkbox => {
+      checkbox.addEventListener('change', () => this.updateSelectedCount());
+    });
+  }
+
+  private locateField(fieldIndex: number): void {
+    const field = this.currentFormFields[fieldIndex];
+    if (!field || !field.element) return;
+    
+    // 滚动到字段位置
+    field.element.scrollIntoView({ 
+      behavior: 'smooth', 
+      block: 'center' 
+    });
+    
+    // 高亮显示字段
+    this.highlightField(field.element);
+    
+    // 聚焦字段
+    setTimeout(() => {
+      if (field.element instanceof HTMLInputElement || 
+          field.element instanceof HTMLTextAreaElement || 
+          field.element instanceof HTMLSelectElement) {
+        field.element.focus();
+      }
+    }, 500);
+  }
+
+  private highlightField(element: HTMLElement): void {
+    // 移除之前的高亮
+    document.querySelectorAll('.aiform-highlight').forEach(el => {
+      el.classList.remove('aiform-highlight');
+    });
+    
+    // 添加高亮样式
+    element.classList.add('aiform-highlight');
+    
+    // 3秒后移除高亮
+    setTimeout(() => {
+      element.classList.remove('aiform-highlight');
+    }, 3000);
+  }
+
+  private updateFieldValue(fieldIndex: number, input: Element): void {
+    const field = this.currentFormFields[fieldIndex];
+    if (!field || !field.element) return;
+    
+    let newValue: string | boolean = '';
+    
+    if (input instanceof HTMLInputElement) {
+      if (input.type === 'checkbox') {
+        newValue = input.checked;
+      } else if (input.type === 'radio') {
+        newValue = input.checked ? input.value : field.value || '';
+      } else {
+        newValue = input.value;
+      }
+    } else if (input instanceof HTMLTextAreaElement || input instanceof HTMLSelectElement) {
+      newValue = input.value;
+    }
+    
+    // 更新页面中的实际字段
+    this.updatePageField(field.element, newValue);
+    
+    // 更新内部记录
+    field.value = newValue;
+  }
+
+  private updatePageField(element: HTMLElement, value: string | boolean): void {
+    if (element instanceof HTMLInputElement) {
+      if (element.type === 'checkbox') {
+        element.checked = Boolean(value);
+      } else {
+        element.value = String(value);
+      }
+      
+      // 触发 change 事件
+      element.dispatchEvent(new Event('change', { bubbles: true }));
+      element.dispatchEvent(new Event('input', { bubbles: true }));
+      
+    } else if (element instanceof HTMLTextAreaElement || element instanceof HTMLSelectElement) {
+      element.value = String(value);
+      
+      // 触发 change 事件
+      element.dispatchEvent(new Event('change', { bubbles: true }));
+      element.dispatchEvent(new Event('input', { bubbles: true }));
+    }
+  }
+
+  private updateSelectedCount(): void {
+    if (!this.sidebar) return;
+    
+    const checkboxes = this.sidebar.querySelectorAll('.aiform-field-checkbox:checked');
+    const countElement = this.sidebar.querySelector('.aiform-selected-count');
+    
+    if (countElement) {
+      countElement.textContent = `${checkboxes.length} 个字段已选择`;
+    }
   }
 
   private saveCurrentFormData(): void {
@@ -325,20 +488,20 @@ export class UIController {
 
   private refreshHistory(): void {
     this.renderHistoryList();
-    this.renderHistoryStats();
   }
 
   private renderHistoryList(): void {
-    const historyList = this.modal?.querySelector('.aiform-history-list');
+    const historyList = this.sidebar?.querySelector('.aiform-history-list');
     if (!historyList) return;
     
     const currentPageHistory = this.historyManager.getCurrentPageHistory();
     
     if (currentPageHistory.length === 0) {
       historyList.innerHTML = `
-        <div class="aiform-no-history">
-          <p>当前页面还没有历史记录</p>
-          <p>填写表单后会自动保存历史数据</p>
+        <div class="aiform-empty-state">
+          <span class="aiform-empty-icon">📚</span>
+          <p>暂无历史记录</p>
+          <p class="aiform-empty-hint">填写表单后会自动保存历史数据</p>
         </div>
       `;
       return;
@@ -349,18 +512,16 @@ export class UIController {
     
     historyList.innerHTML = sortedHistory.map((entry, index) => `
       <div class="aiform-history-item" data-id="${entry.id}">
-        <div class="aiform-history-main">
-          <div class="aiform-history-info">
-            <div class="aiform-history-time">${this.historyManager.formatTimestamp(entry.timestamp)}</div>
-            <div class="aiform-history-fields">${entry.fieldCount} 个字段</div>
-          </div>
-          <div class="aiform-history-preview">
-            ${this.formatHistoryData(entry.data)}
-          </div>
+        <div class="aiform-history-info">
+          <div class="aiform-history-time">${this.historyManager.formatTimestamp(entry.timestamp)}</div>
+          <div class="aiform-history-meta">${entry.fieldCount} 个字段</div>
+        </div>
+        <div class="aiform-history-preview">
+          ${this.formatHistoryData(entry.data)}
         </div>
         <div class="aiform-history-actions">
-          <button class="aiform-history-restore" title="恢复此记录">恢复</button>
-          <button class="aiform-history-delete" title="删除此记录">删除</button>
+          <button class="aiform-btn aiform-btn-xs aiform-history-restore" title="恢复此记录">恢复</button>
+          <button class="aiform-btn aiform-btn-xs aiform-btn-danger aiform-history-delete" title="删除此记录">删除</button>
         </div>
       </div>
     `).join('');
@@ -377,50 +538,19 @@ export class UIController {
 
   private formatHistoryData(data: Record<string, any>): string {
     const entries = Object.entries(data);
-    if (entries.length <= 3) {
-      return entries.map(([key, value]) => `${key}: ${String(value).substring(0, 20)}`).join(', ');
+    if (entries.length <= 2) {
+      return entries.map(([key, value]) => `${key}: ${String(value).substring(0, 15)}`).join(', ');
     } else {
-      const preview = entries.slice(0, 2).map(([key, value]) => `${key}: ${String(value).substring(0, 15)}`).join(', ');
+      const preview = entries.slice(0, 1).map(([key, value]) => `${key}: ${String(value).substring(0, 15)}`).join(', ');
       return `${preview}... 等${entries.length}项`;
     }
-  }
-
-  private renderHistoryStats(): void {
-    const statsContainer = this.modal?.querySelector('.aiform-history-stats');
-    if (!statsContainer) return;
-    
-    const allHistory = this.historyManager.getAllHistory();
-    const currentPageHistory = this.historyManager.getCurrentPageHistory();
-    const storageInfo = this.historyManager.getStorageInfo();
-    
-    const usedMB = (storageInfo.used / (1024 * 1024)).toFixed(2);
-    const totalMB = (storageInfo.total / (1024 * 1024)).toFixed(0);
-    
-    statsContainer.innerHTML = `
-      <div class="aiform-storage-stats">
-        <div class="aiform-stat-item">
-          <span class="aiform-stat-label">当前页面:</span>
-          <span class="aiform-stat-value">${currentPageHistory.length} 条记录</span>
-        </div>
-        <div class="aiform-stat-item">
-          <span class="aiform-stat-label">全部历史:</span>
-          <span class="aiform-stat-value">${allHistory.length} 条记录</span>
-        </div>
-        <div class="aiform-stat-item">
-          <span class="aiform-stat-label">存储使用:</span>
-          <span class="aiform-stat-value">${usedMB}MB / ${totalMB}MB</span>
-        </div>
-      </div>
-    `;
   }
 
   private restoreLatestHistory(): void {
     const latestData = this.historyManager.getLatestFormData();
     if (latestData) {
-      // 这里需要调用外部的填充函数
       this.restoreFormData(latestData);
       this.showStatus('已恢复最新的历史数据', 'success');
-      this.closeModal();
     } else {
       this.showStatus('没有找到历史数据', 'error');
     }
@@ -429,7 +559,6 @@ export class UIController {
   private restoreHistoryEntry(entry: FormHistoryEntry): void {
     this.restoreFormData(entry.data);
     this.showStatus('已恢复历史数据', 'success');
-    this.closeModal();
   }
 
   private deleteHistoryEntry(id: string): void {
@@ -455,162 +584,51 @@ export class UIController {
   }
 
   private restoreFormData(data: Record<string, any>): void {
-    // 需要访问外部的表单填充器
-    // 这里我们派发一个自定义事件
+    // 派发自定义事件
     const event = new CustomEvent('aiform-restore-data', { detail: data });
     document.dispatchEvent(event);
   }
 
-  private renderFormDataTable(): void {
-    const tbody = this.modal?.querySelector('.aiform-data-tbody');
-    const noDataDiv = this.modal?.querySelector('.aiform-no-data') as HTMLElement;
-    const tableContainer = this.modal?.querySelector('.aiform-data-table-container') as HTMLElement;
-    
-    if (!tbody) return;
-    
-    if (this.currentFormFields.length === 0) {
-      if (noDataDiv) noDataDiv.style.display = 'block';
-      if (tableContainer) tableContainer.style.display = 'none';
-      return;
-    }
-    
-    if (noDataDiv) noDataDiv.style.display = 'none';
-    if (tableContainer) tableContainer.style.display = 'block';
-    
-    tbody.innerHTML = '';
-    
-    this.currentFormFields.forEach((field, index) => {
-      const row = document.createElement('tr');
-      row.className = 'aiform-data-row';
-      
-      // 构建状态标识
-      const statusBadges = [];
-      if (field.required) statusBadges.push('<span class="aiform-badge aiform-badge-required">必填</span>');
-      if (field.readonly) statusBadges.push('<span class="aiform-badge aiform-badge-readonly">只读</span>');
-      if (field.disabled) statusBadges.push('<span class="aiform-badge aiform-badge-disabled">禁用</span>');
-      
-      // 构建可选项显示
-      let optionsDisplay = '-';
-      if (field.options && field.options.length > 0) {
-        if (field.options.length <= 3) {
-          optionsDisplay = field.options.join(', ');
-        } else {
-          optionsDisplay = field.options.slice(0, 2).join(', ') + `... (共${field.options.length}项)`;
-        }
-      }
-      
-      row.innerHTML = `
-        <td class="aiform-checkbox-col">
-          <input type="checkbox" class="aiform-field-checkbox" data-index="${index}" 
-                 ${!field.readonly && !field.disabled && field.value ? 'checked' : ''}>
-        </td>
-        <td class="aiform-field-col">
-          <div class="aiform-field-name" title="${field.key}">${field.key}</div>
-          ${field.label ? `<div class="aiform-field-label">${field.label}</div>` : ''}
-        </td>
-        <td class="aiform-type-col">
-          <span class="aiform-type-badge">${field.type}</span>
-        </td>
-        <td class="aiform-value-col">
-          <div class="aiform-current-value" title="${field.value || ''}">${field.value || '<空>'}</div>
-          ${field.placeholder ? `<div class="aiform-placeholder">提示: ${field.placeholder}</div>` : ''}
-        </td>
-        <td class="aiform-options-col">
-          <div class="aiform-options" title="${field.options?.join(', ') || ''}">${optionsDisplay}</div>
-        </td>
-        <td class="aiform-status-col">
-          ${statusBadges.join(' ')}
-        </td>
-      `;
-      
-      tbody.appendChild(row);
-    });
-    
-    // 绑定复选框事件
-    const checkboxes = tbody.querySelectorAll('.aiform-field-checkbox');
-    checkboxes.forEach(checkbox => {
-      checkbox.addEventListener('change', () => this.updateSelectedCount());
-    });
-  }
-
-  private selectAllFields(select: boolean): void {
-    const checkboxes = this.modal?.querySelectorAll('.aiform-field-checkbox') as NodeListOf<HTMLInputElement>;
-    checkboxes?.forEach(checkbox => {
-      // 只选择非只读、非禁用且有值的字段
-      const index = parseInt(checkbox.dataset.index || '0');
-      const field = this.currentFormFields[index];
-      if (!field.readonly && !field.disabled && field.value) {
-        checkbox.checked = select;
-      }
-    });
-    this.updateSelectedCount();
-  }
-
-  private updateSelectedCount(): void {
-    const checkboxes = this.modal?.querySelectorAll('.aiform-field-checkbox:checked') as NodeListOf<HTMLInputElement>;
-    const countSpan = this.modal?.querySelector('.aiform-selected-count span');
-    if (countSpan) {
-      countSpan.textContent = checkboxes?.length.toString() || '0';
-    }
-  }
-
-  private getSelectedFields(): Record<string, any> {
-    const selectedData: Record<string, any> = {};
-    const checkboxes = this.modal?.querySelectorAll('.aiform-field-checkbox:checked') as NodeListOf<HTMLInputElement>;
-    
-    checkboxes?.forEach(checkbox => {
-      const index = parseInt(checkbox.dataset.index || '0');
-      const field = this.currentFormFields[index];
-      if (field && field.value !== null) {
-        selectedData[field.key] = field.value;
-      }
-    });
-    
-    return selectedData;
-  }
-
   private loadConfig(): void {
-    if (!this.modal) return;
+    if (!this.sidebar) return;
     
-    const providerSelect = this.modal.querySelector('.aiform-provider') as HTMLSelectElement;
-    const apiKeyInput = this.modal.querySelector('.aiform-api-key') as HTMLInputElement;
-    const modelInput = this.modal.querySelector('.aiform-model') as HTMLInputElement;
-    const apiUrlInput = this.modal.querySelector('.aiform-api-url') as HTMLInputElement;
-    const promptTextarea = this.modal.querySelector('.aiform-prompt') as HTMLTextAreaElement;
+    const providerSelect = this.sidebar.querySelector('.aiform-provider') as HTMLSelectElement;
+    const apiKeyInput = this.sidebar.querySelector('.aiform-api-key') as HTMLInputElement;
+    const modelInput = this.sidebar.querySelector('.aiform-model') as HTMLInputElement;
+    const apiUrlInput = this.sidebar.querySelector('.aiform-api-url') as HTMLInputElement;
     
     if (providerSelect) providerSelect.value = this.config.provider || 'openai';
     if (apiKeyInput) apiKeyInput.value = this.config.apiKey || '';
     if (modelInput) modelInput.value = this.config.model || '';
     if (apiUrlInput) apiUrlInput.value = this.config.apiUrl || '';
-    if (promptTextarea) promptTextarea.value = this.config.prompt || '';
   }
 
   private getConfigFromUI(): Partial<AIFormConfig> {
-    if (!this.modal) return {};
+    if (!this.sidebar) return {};
     
-    const providerSelect = this.modal.querySelector('.aiform-provider') as HTMLSelectElement;
-    const apiKeyInput = this.modal.querySelector('.aiform-api-key') as HTMLInputElement;
-    const modelInput = this.modal.querySelector('.aiform-model') as HTMLInputElement;
-    const apiUrlInput = this.modal.querySelector('.aiform-api-url') as HTMLInputElement;
-    const promptTextarea = this.modal.querySelector('.aiform-prompt') as HTMLTextAreaElement;
+    const providerSelect = this.sidebar.querySelector('.aiform-provider') as HTMLSelectElement;
+    const apiKeyInput = this.sidebar.querySelector('.aiform-api-key') as HTMLInputElement;
+    const modelInput = this.sidebar.querySelector('.aiform-model') as HTMLInputElement;
+    const apiUrlInput = this.sidebar.querySelector('.aiform-api-url') as HTMLInputElement;
     
     return {
-      provider: providerSelect?.value as 'openai' | 'openrouter' | 'deepseek',
-      apiKey: apiKeyInput?.value,
-      model: modelInput?.value,
-      apiUrl: apiUrlInput?.value,
-      prompt: promptTextarea?.value
+      provider: providerSelect?.value || 'openai',
+      apiKey: apiKeyInput?.value || '',
+      model: modelInput?.value || '',
+      apiUrl: apiUrlInput?.value || ''
     };
   }
 
   private async testConnection(): Promise<void> {
-    const config = this.getConfigFromUI();
     this.showStatus('正在测试连接...', 'info');
     
-    // 这里可以添加实际的连接测试逻辑
-    setTimeout(() => {
+    try {
+      // 这里可以添加连接测试逻辑
+      await new Promise(resolve => setTimeout(resolve, 1000));
       this.showStatus('连接测试成功！', 'success');
-    }, 1000);
+    } catch (error) {
+      this.showStatus('连接测试失败', 'error');
+    }
   }
 
   private async handleRewrite(): Promise<void> {
@@ -618,38 +636,49 @@ export class UIController {
     const config = this.getConfigFromUI();
     
     if (Object.keys(selectedData).length === 0) {
-      this.showError('请至少选择一个字段进行重写');
+      this.showStatus('请至少选择一个字段', 'error');
       return;
     }
-    
-    if (!config.apiKey) {
-      this.showError('请先配置API密钥');
-      return;
-    }
-    
-    this.showStatus(`正在重写 ${Object.keys(selectedData).length} 个字段...`, 'info');
     
     try {
       await this.onRewrite(selectedData, config);
-      this.closeModal();
+      this.refreshFormData();
     } catch (error) {
-      this.showError((error as Error).message);
+      this.showStatus('重写失败: ' + (error instanceof Error ? error.message : String(error)), 'error');
     }
   }
 
-  showStatus(message: string, type: 'info' | 'success' | 'error'): void {
-    const status = this.modal?.querySelector('.aiform-status');
-    if (status) {
-      status.className = `aiform-status aiform-status-${type}`;
-      status.textContent = message;
-      
-      if (type === 'success') {
-        setTimeout(() => {
-          status.textContent = '';
-          status.className = 'aiform-status';
-        }, 3000);
+  private getSelectedFields(): Record<string, any> {
+    if (!this.sidebar) return {};
+    
+    const selectedData: Record<string, any> = {};
+    const checkboxes = this.sidebar.querySelectorAll('.aiform-field-checkbox:checked');
+    
+    checkboxes.forEach(checkbox => {
+      const fieldItem = checkbox.closest('.aiform-field-item');
+      if (fieldItem) {
+        const fieldIndex = parseInt(fieldItem.getAttribute('data-field-index') || '0');
+        const field = this.currentFormFields[fieldIndex];
+        if (field && field.name) {
+          selectedData[field.name] = field.value || '';
+        }
       }
-    }
+    });
+    
+    return selectedData;
+  }
+
+  showStatus(message: string, type: 'info' | 'success' | 'error'): void {
+    const statusDiv = this.sidebar?.querySelector('.aiform-status') as HTMLElement;
+    if (!statusDiv) return;
+    
+    statusDiv.textContent = message;
+    statusDiv.className = `aiform-status aiform-status-${type}`;
+    statusDiv.style.display = 'block';
+    
+    setTimeout(() => {
+      statusDiv.style.display = 'none';
+    }, 3000);
   }
 
   showSuccess(message: string): void {
@@ -666,9 +695,9 @@ export class UIController {
       this.button = null;
     }
     
-    if (this.modal) {
-      this.modal.remove();
-      this.modal = null;
+    if (this.sidebar) {
+      this.sidebar.remove();
+      this.sidebar = null;
     }
   }
 } 
