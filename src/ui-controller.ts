@@ -291,7 +291,7 @@ export class UIController {
           </div>
           <div class="aiform-field-actions">
             <button class="aiform-field-locate" title="定位到表单字段">📍</button>
-            <input type="checkbox" class="aiform-field-checkbox" ${field.value ? 'checked' : ''}>
+            <input type="checkbox" class="aiform-field-checkbox" ${field.readonly ? '' : 'checked'}>
           </div>
         </div>
         
